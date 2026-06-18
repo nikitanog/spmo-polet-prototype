@@ -21,6 +21,8 @@ const menuItems: MenuProps['items'] = [
     { key: 'db-open', label: 'Открыть' },
     { key: 'db-change', label: 'Изменить' },
     { key: 'db-editor', label: 'Редактор' },
+    { type: 'divider' },
+    { key: 'db-param-types', label: 'Типы параметров' },
   ]},
   { key: 'trajectory', icon: <NodeIndexOutlined />, label: 'Траектория', children: [
     { key: 'traj-calc', label: 'Рассчитать' },
@@ -86,6 +88,8 @@ const menuItems: MenuProps['items'] = [
   { key: 'processing', icon: <ToolOutlined />, label: 'Вторичная обработка', children: [
     { key: 'proc-calc-params', label: 'Расчетные параметры' },
     { key: 'proc-tasks', label: 'Задачи' },
+    { key: 'proc-tenso', label: 'Тензопараметры' },
+    { type: 'divider' },
     { key: 'proc-gfx-editor', label: 'Графический редактор' },
   ]},
   { key: 'service', icon: <SettingOutlined />, label: 'Сервис', children: [
@@ -104,6 +108,9 @@ const menuItems: MenuProps['items'] = [
       { key: 'sync-auto', label: 'Автоматическая' },
       { key: 'sync-manual', label: 'Ручная' },
     ]},
+    { type: 'divider' },
+    { key: 'service-piv', label: 'Управление ПИВ' },
+    { key: 'service-batch', label: 'Пакетная обработка' },
     { type: 'divider' },
     { key: 'service-settings', label: 'Настройки' },
   ]},

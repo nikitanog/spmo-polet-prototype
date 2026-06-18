@@ -16,6 +16,13 @@ import ImportWizardModal from '../modals/ImportWizardModal';
 import FaultsModal from '../modals/FaultsModal';
 import StatisticsModal from '../modals/StatisticsModal';
 import SampleModal from '../modals/SampleModal';
+import ParameterTypeModal from '../modals/ParameterTypeModal';
+import PivControlModal from '../modals/PivControlModal';
+import BatchProcessingModal from '../modals/BatchProcessingModal';
+import GraphicsEditorModal from '../modals/GraphicsEditorModal';
+import CalcParamsModal from '../modals/CalcParamsModal';
+import TensoParamsModal from '../modals/TensoParamsModal';
+import { CameraOutlined } from '@ant-design/icons';
 import { useAppStore } from '../stores/useAppStore';
 
 const { Header, Sider, Content } = Layout;
@@ -38,6 +45,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [faultsOpen, setFaultsOpen] = useState(false);
   const [statisticsOpen, setStatisticsOpen] = useState(false);
   const [sampleOpen, setSampleOpen] = useState(false);
+  const [paramTypeOpen, setParamTypeOpen] = useState(false);
+  const [pivOpen, setPivOpen] = useState(false);
+  const [batchOpen, setBatchOpen] = useState(false);
+  const [gfxEditorOpen, setGfxEditorOpen] = useState(false);
+  const [calcParamsOpen, setCalcParamsOpen] = useState(false);
+  const [tensoOpen, setTensoOpen] = useState(false);
 
   useEffect(() => {
     setSelectObjectOpen(true);
@@ -179,17 +192,22 @@ export default function MainLayout({ children }: MainLayoutProps) {
         Modal.info({ title: 'Сохранить график', content: 'Формат: .png / .svg / .pdf / .grf' });
         break;
       case 'table-values':
-        message.info('Откройте таблицу значений на странице workspace или перейдите по меню');
+        navigate('/');
         break;
       case 'table-stat':
         setStatisticsOpen(true);
         break;
       case 'proc-tasks':
-      case 'proc-calc-params':
         navigate('/processing');
         break;
+      case 'proc-calc-params':
+        setCalcParamsOpen(true);
+        break;
+      case 'proc-tenso':
+        setTensoOpen(true);
+        break;
       case 'proc-gfx-editor':
-        Modal.info({ title: 'Графический редактор', content: 'Создание и редактирование шаблонов графиков. Макет, легенда, линии, текст.' });
+        setGfxEditorOpen(true);
         break;
       case 'import-text':
       case 'import-excel':
@@ -206,8 +224,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
       case 'sync-manual':
         setSyncOpen(true);
         break;
+      case 'db-param-types':
+        setParamTypeOpen(true);
+        break;
+      case 'service-piv':
+        setPivOpen(true);
+        break;
+      case 'service-batch':
+        setBatchOpen(true);
+        break;
       case 'service-settings':
         setSettingsOpen(true);
+        break;
+      case 'screenshot':
+        message.success('Снимок экрана сохранён: screenshot_2026-06-18.png');
         break;
       case 'help-f1':
         Modal.info({ title: 'Справка', content: 'СПМО «Полёт» версия 5. Руководство оператора. Раздел: справка по программе.' });
@@ -330,6 +360,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
             <Tooltip title="Сохранить (Ctrl+S)"><Button size="small" icon={<SaveOutlined />} onClick={() => message.success('Сохранено')} /></Tooltip>
             <Tooltip title="Рассчитать (F5)"><Button size="small" icon={<CalculatorOutlined />} onClick={() => setTrajCalcOpen(true)} /></Tooltip>
             <Tooltip title="Удалить (Del)"><Button size="small" icon={<DeleteOutlined />} onClick={() => Modal.confirm({ title: 'Удалить?', onOk: () => message.success('Удалено') })} /></Tooltip>
+            <div style={{ flex: 1 }} />
+            <Tooltip title="Снимок экрана"><Button size="small" icon={<CameraOutlined />} onClick={() => message.success('Снимок экрана: screenshot_2026-06-18.png')} /></Tooltip>
           </div>
           <div
             style={{ flex: 1, padding: 16 }}
@@ -356,6 +388,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <FaultsModal open={faultsOpen} onClose={() => setFaultsOpen(false)} />
       <StatisticsModal open={statisticsOpen} onClose={() => setStatisticsOpen(false)} />
       <SampleModal open={sampleOpen} onClose={() => setSampleOpen(false)} />
+      <ParameterTypeModal open={paramTypeOpen} onClose={() => setParamTypeOpen(false)} />
+      <PivControlModal open={pivOpen} onClose={() => setPivOpen(false)} />
+      <BatchProcessingModal open={batchOpen} onClose={() => setBatchOpen(false)} />
+      <GraphicsEditorModal open={gfxEditorOpen} onClose={() => setGfxEditorOpen(false)} />
+      <CalcParamsModal open={calcParamsOpen} onClose={() => setCalcParamsOpen(false)} />
+      <TensoParamsModal open={tensoOpen} onClose={() => setTensoOpen(false)} />
     </Layout>
   );
 }
