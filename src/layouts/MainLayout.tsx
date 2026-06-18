@@ -351,9 +351,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           onCollapse={setCollapsed}
           style={{ background: isFlight ? '#16213e' : '#fafafa', borderRight: '1px solid #d9d9d9' }}
         >
-          <ObjectTree />
+          <ObjectTree collapsed={collapsed} />
         </Sider>
-        <Content style={{ padding: 0, background: bgColor, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
+        <Content style={{ padding: 0, background: bgColor, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <MainMenuBar onMenuClick={handleMenuClick} />
           <div style={toolbarStyle}>
             <Tooltip title="Открыть (Ctrl+O)"><Button size="small" icon={<FolderOpenOutlined />} onClick={() => Modal.info({ title: 'Открыть', content: 'Выберите .trj файл' })} /></Tooltip>
