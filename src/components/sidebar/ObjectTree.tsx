@@ -21,33 +21,40 @@ export default function ObjectTree({ collapsed }: ObjectTreeProps) {
 
   if (collapsed) {
     return (
-      <div style={{ padding: 8, height: '100%', display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'center' }}>
-        <Tree
-          treeData={themes.map((t) => ({
-            title: '📁',
-            key: t.id,
-            children: t.objects.map((o) => ({ title: '📄', key: o.id })),
-          }))}
-          selectedKeys={selectedObjectId ? [selectedObjectId] : selectedTopicId ? [selectedTopicId] : []}
-          onSelect={(keys) => {
-            if (keys.length === 0) return;
-            const key = keys[0] as string;
-            const isTopic = themes.some((t) => t.id === key);
-            if (isTopic) selectTopic(key);
-            else selectObject(key);
-          }}
-          defaultExpandAll
-          style={{ width: 40 }}
-          blockNode
-        />
-        <div style={{ borderTop: '1px solid #d9d9d9', paddingTop: 8, width: '100%' }}>
-          <Select
-            style={{ width: '100%' }}
-            placeholder="..."
-            options={trajOptions}
-            value={useAppStore.getState().activeTrajectoryId}
-            onChange={(val) => setActiveTrajectory(val)}
-          />
+      <div style={{ padding: '8px 4px', height: '100%', display: 'flex', flexDirection: 'column', gap: 4, alignItems: 'center', overflow: 'hidden' }}>
+        <div style={{ fontSize: 10, color: '#888', marginBottom: 4, whiteSpace: 'nowrap', overflow: 'hidden', width: '100%', textAlign: 'center' }}>Темы</div>
+        {themes.map(t => (
+          <div key={t.id} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+            <div
+              onClick={() => selectTopic(t.id)}
+              style={{ cursor: 'pointer', fontSize: 18, lineHeight: 1, opacity: selectedTopicId === t.id ? 1 : 0.5 }}
+              title={t.name}
+            >
+              📁
+            </div>
+            {t.objects.map(o => (
+              <div
+                key={o.id}
+                onClick={() => selectObject(o.id)}
+                style={{ cursor: 'pointer', fontSize: 14, lineHeight: 1, opacity: selectedObjectId === o.id ? 1 : 0.4 }}
+                title={o.name}
+              >
+                📄
+              </div>
+            ))}
+          </div>
+        ))}
+        <div style={{ borderTop: '1px solid #d9d9d9', paddingTop: 8, marginTop: 'auto', width: '100%', textAlign: 'center' }}>
+          <div
+            onClick={() => {
+              const active = useAppStore.getState().activeTrajectoryId;
+              if (active) setActiveTrajectory(active === trajectories[0]?.id ? trajectories[1]?.id : trajectories[0]?.id);
+            }}
+            style={{ cursor: 'pointer', fontSize: 18 }}
+            title="Переключить траекторию"
+          >
+            🔄
+          </div>
         </div>
       </div>
     );

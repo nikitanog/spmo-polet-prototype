@@ -346,10 +346,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Layout>
         <Sider
           width={220}
+          collapsedWidth={52}
           collapsed={collapsed}
           collapsible
           onCollapse={setCollapsed}
-          style={{ background: isFlight ? '#16213e' : '#fafafa', borderRight: '1px solid #d9d9d9' }}
+          style={{ background: isFlight ? '#16213e' : '#fafafa', borderRight: '1px solid #d9d9d9', overflow: 'hidden' }}
         >
           <ObjectTree collapsed={collapsed} />
         </Sider>
