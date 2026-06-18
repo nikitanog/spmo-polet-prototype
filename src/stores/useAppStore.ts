@@ -25,6 +25,8 @@ interface AppState {
   removeMarker: (id: string) => void;
   clearMarkers: () => void;
   setMarkers: (markers: Marker[]) => void;
+  addTopic: (name: string) => void;
+  addObject: (topicId: string, name: string) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -45,4 +47,15 @@ export const useAppStore = create<AppState>((set) => ({
   removeMarker: (id) => set((s) => ({ markers: s.markers.filter((m) => m.id !== id) })),
   clearMarkers: () => set({ markers: [] }),
   setMarkers: (markers) => set({ markers }),
+  addTopic: (name) => set((s) => {
+    const newTopic: Theme = { id: `t${Date.now()}`, name, objects: [] };
+    return { themes: [...s.themes, newTopic] };
+  }),
+  addObject: (topicId, name) => set((s) => ({
+    themes: s.themes.map((t) =>
+      t.id === topicId
+        ? { ...t, objects: [...t.objects, { id: `o${Date.now()}`, name }] }
+        : t
+    ),
+  })),
 }));

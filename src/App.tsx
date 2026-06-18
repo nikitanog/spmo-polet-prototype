@@ -3,7 +3,9 @@ import { ConfigProvider, theme as antTheme } from 'antd';
 import MainLayout from './layouts/MainLayout';
 import WorkspacePage from './components/screens/WorkspacePage';
 import DatabasePage from './components/database/DatabasePage';
+import DbEditorPage from './components/database/DbEditorPage';
 import ScreenPage from './components/screens/ScreenPage';
+import ScreenManagerPage from './components/screens/ScreenManagerPage';
 import ProcessingPage from './components/processing/ProcessingPage';
 import { useAppStore } from './stores/useAppStore';
 
@@ -26,7 +28,9 @@ export default function App() {
           <Routes>
             <Route path="/" element={<WorkspacePage />} />
             <Route path="/db" element={<DatabasePage />} />
+            <Route path="/db-editor" element={<DbEditorPage />} />
             <Route path="/screen" element={<ScreenPage />} />
+            <Route path="/screens" element={<ScreenManagerPage />} />
             <Route path="/processing" element={<ProcessingPage />} />
           </Routes>
         </MainLayout>

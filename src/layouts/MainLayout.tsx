@@ -16,14 +16,40 @@ import ImportWizardModal from '../modals/ImportWizardModal';
 import FaultsModal from '../modals/FaultsModal';
 import StatisticsModal from '../modals/StatisticsModal';
 import SampleModal from '../modals/SampleModal';
+import TrajOpenModal from '../modals/TrajOpenModal';
+import TrajSavePartModal from '../modals/TrajSavePartModal';
+import TrajDelPartModal from '../modals/TrajDelPartModal';
 import ParameterTypeModal from '../modals/ParameterTypeModal';
 import PivControlModal from '../modals/PivControlModal';
 import BatchProcessingModal from '../modals/BatchProcessingModal';
 import GraphicsEditorModal from '../modals/GraphicsEditorModal';
 import CalcParamsModal from '../modals/CalcParamsModal';
 import TensoParamsModal from '../modals/TensoParamsModal';
+import CreateTopicModal from '../modals/CreateTopicModal';
+import CreateObjectModal from '../modals/CreateObjectModal';
+import OpenDbModal from '../modals/OpenDbModal';
+import DbCompareModal from '../modals/DbCompareModal';
+import DbUpdateModal from '../modals/DbUpdateModal';
+import ScreenCreateModal from '../modals/ScreenCreateModal';
+import ScreenSaveModal from '../modals/ScreenSaveModal';
+import ScreenSplitModal from '../modals/ScreenSplitModal';
+import AddFuncModal from '../modals/AddFuncModal';
+import GraphLimitsModal from '../modals/GraphLimitsModal';
+import GraphAutoModal from '../modals/GraphAutoModal';
+import GraphAxisModal from '../modals/GraphAxisModal';
+import GraphSaveModal from '../modals/GraphSaveModal';
+import TableSettingsModal from '../modals/TableSettingsModal';
+import TableExportModal from '../modals/TableExportModal';
+import PrintPreviewModal from '../modals/PrintPreviewModal';
+import TaskLoadModal from '../modals/TaskLoadModal';
+import TaskSaveModal from '../modals/TaskSaveModal';
+import DbExportModal from '../modals/DbExportModal';
+import DbCheckModal from '../modals/DbCheckModal';
+import ScreenWinAddModal from '../modals/ScreenWinAddModal';
+import AddValueModal from '../modals/AddValueModal';
 import { CameraOutlined } from '@ant-design/icons';
 import { useAppStore } from '../stores/useAppStore';
+import { useViewStore } from '../stores/useViewStore';
 
 const { Header, Sider, Content } = Layout;
 
@@ -37,6 +63,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   const [selectObjectOpen, setSelectObjectOpen] = useState(false);
   const [trajCalcOpen, setTrajCalcOpen] = useState(false);
+  const [trajOpenOpen, setTrajOpenOpen] = useState(false);
+  const [trajSavePartOpen, setTrajSavePartOpen] = useState(false);
+  const [trajDelPartOpen, setTrajDelPartOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [syncOpen, setSyncOpen] = useState(false);
@@ -50,6 +79,27 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [gfxEditorOpen, setGfxEditorOpen] = useState(false);
   const [calcParamsOpen, setCalcParamsOpen] = useState(false);
   const [tensoOpen, setTensoOpen] = useState(false);
+  const [createTopicOpen, setCreateTopicOpen] = useState(false);
+  const [createObjectOpen, setCreateObjectOpen] = useState(false);
+  const [openDbOpen, setOpenDbOpen] = useState(false);
+  const [dbCompareOpen, setDbCompareOpen] = useState(false);
+  const [dbUpdateOpen, setDbUpdateOpen] = useState(false);
+  const [screenSaveOpen, setScreenSaveOpen] = useState(false);
+  const [screenSplitOpen, setScreenSplitOpen] = useState(false);
+  const [addFuncOpen, setAddFuncOpen] = useState(false);
+  const [graphLimitsOpen, setGraphLimitsOpen] = useState(false);
+  const [graphAutoOpen, setGraphAutoOpen] = useState(false);
+  const [graphAxisOpen, setGraphAxisOpen] = useState(false);
+  const [graphSaveOpen, setGraphSaveOpen] = useState(false);
+  const [tableSettingsOpen, setTableSettingsOpen] = useState(false);
+  const [tableExportOpen, setTableExportOpen] = useState(false);
+  const [printPreviewOpen, setPrintPreviewOpen] = useState(false);
+  const [taskLoadOpen, setTaskLoadOpen] = useState(false);
+  const [taskSaveOpen, setTaskSaveOpen] = useState(false);
+  const [dbExportOpen, setDbExportOpen] = useState(false);
+  const [dbCheckOpen, setDbCheckOpen] = useState(false);
+  const [screenWinAddOpen, setScreenWinAddOpen] = useState(false);
+  const [addValueOpen, setAddValueOpen] = useState(false);
 
   useEffect(() => {
     setSelectObjectOpen(true);
@@ -61,8 +111,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setSelectObjectOpen(true);
         break;
       case 'object-create-topic':
+        setCreateTopicOpen(true);
+        break;
       case 'object-create-object':
-        Modal.info({ title: key === 'object-create-topic' ? 'Создать тему' : 'Создать объект', content: `Диалог создания — макет. Имя: [поле ввода]` });
+        setCreateObjectOpen(true);
         break;
       case 'object-exit':
         Modal.confirm({ title: 'Завершить работу с СПМО «Полёт»?', onOk: () => window.close() });
@@ -71,20 +123,20 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setTrajCalcOpen(true);
         break;
       case 'traj-open':
-        Modal.info({ title: 'Открыть файл', content: 'Выберите .trj файл для открытия. Фильтр: *.trj' });
+        setTrajOpenOpen(true);
         break;
       case 'traj-close':
         useAppStore.getState().setActiveTrajectory(null);
         message.success('Траектория закрыта');
         break;
       case 'traj-save-as':
-        Modal.info({ title: 'Сохранить как', content: 'Диалог сохранения траектории. Имя файла: [ввод], формат: .trj' });
+        setTrajSavePartOpen(true);
         break;
       case 'traj-save-part':
-        Modal.info({ title: 'Сохранить часть траектории', content: 'Выберите интервал: от [время] до [время]. Имя файла: [ввод]' });
+        setTrajSavePartOpen(true);
         break;
       case 'traj-del-part':
-        Modal.info({ title: 'Удалить часть траектории', content: 'Выберите интервал для удаления: от [время] до [время]' });
+        setTrajDelPartOpen(true);
         break;
       case 'traj-faults-time':
       case 'traj-faults-param':
@@ -105,30 +157,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
         break;
       case 'db-view':
       case 'db-current':
-      case 'db-editor':
         navigate('/db');
         break;
+      case 'db-editor':
+        navigate('/db-editor');
+        break;
       case 'db-calc':
-        Modal.info({ title: 'Расчётная БД', content: 'Просмотр расчётной базы данных' });
+        navigate('/db');
         break;
       case 'db-change':
-        Modal.info({ title: 'Сменить БД', content: 'Выберите другую базу данных СБИ' });
+        setOpenDbOpen(true);
         break;
       case 'db-open':
-        Modal.info({ title: 'Открыть БД', content: 'Выберите файл базы данных (*.csv, *.dbf, *.db)' });
+        setOpenDbOpen(true);
         break;
       case 'screen-create':
+        navigate('/screens');
+        break;
       case 'screen-open':
-        navigate('/screen');
+        navigate('/screens');
         break;
       case 'screen-save':
         message.success('Экран сохранён');
         break;
       case 'screen-save-as':
-        Modal.info({ title: 'Сохранить экран как', content: 'Имя файла: [ввод], формат: .scr' });
+        setScreenSaveOpen(true);
         break;
       case 'screen-win-add':
-        Modal.info({ title: 'Добавить рабочее окно', content: 'Тип: график / таблица / комбинированное' });
+        setScreenWinAddOpen(true);
         break;
       case 'screen-win-del':
         Modal.confirm({ title: 'Удалить рабочее окно?', onOk: () => message.success('Окно удалено') });
@@ -143,61 +199,89 @@ export default function MainLayout({ children }: MainLayoutProps) {
         Modal.info({ title: 'Переместить/Копировать', content: 'Выберите позицию назначения' });
         break;
       case 'screen-split':
-        message.info('Рабочая область разделена на 2 экрана');
+        setScreenSplitOpen(true);
         break;
       case 'view-scales':
-        message.info('Шкалы параметров: показаны');
+        useViewStore.getState().setScalesVisible(!useViewStore.getState().scalesVisible);
+        message.success(useViewStore.getState().scalesVisible ? 'Шкалы параметров: показаны' : 'Шкалы параметров: скрыты');
         break;
       case 'view-values-list':
-        message.info('Текущие значения: режим списка');
+        useViewStore.getState().setValuesMode('list');
+        message.success('Текущие значения: режим списка');
         break;
       case 'view-values-table':
-        message.info('Текущие значения: режим таблицы');
+        useViewStore.getState().setValuesMode('table');
+        message.success('Текущие значения: режим таблицы');
         break;
       case 'view-values-off':
-        message.info('Текущие значения: скрыты');
+        useViewStore.getState().setValuesMode('hidden');
+        message.success('Текущие значения: скрыты');
         break;
       case 'cursor-cross':
-        message.info('Курсор: перекрестье');
+        useViewStore.getState().setCursorMode('cross');
+        message.success('Курсор: перекрестье');
         break;
       case 'cursor-cross-val':
-        message.info('Курсор: перекрестье со значениями');
+        useViewStore.getState().setCursorMode('crossVal');
+        message.success('Курсор: перекрестье со значениями');
         break;
       case 'cursor-arrow':
-        message.info('Курсор: стрелка');
+        useViewStore.getState().setCursorMode('arrow');
+        message.success('Курсор: стрелка');
         break;
       case 'cursor-vline':
-        message.info('Курсор: вертикальная линия');
+        useViewStore.getState().setCursorMode('vline');
+        message.success('Курсор: вертикальная линия');
         break;
       case 'graph-add-func':
-        Modal.info({ title: 'Добавить функцию', content: 'Выберите параметр из дерева. Поиск: [строка]' });
+        setAddFuncOpen(true);
         break;
       case 'graph-add-val':
-        Modal.info({ title: 'Добавить значение', content: 'Выберите параметр для отображения текущего значения' });
+        setAddValueOpen(true);
         break;
       case 'graph-limits':
-        Modal.info({ title: 'Пределы функции', content: 'Min: [авто/вручную], Max: [авто/вручную]' });
+        setGraphLimitsOpen(true);
         break;
       case 'graph-auto':
-        Modal.info({ title: 'Автопостроение', content: 'Выберите несколько параметров. Будет применён авто-масштаб.' });
+        setGraphAutoOpen(true);
         break;
       case 'graph-axis':
-        Modal.info({ title: 'Свойства шкалы оси X', content: 'Ось X: время / [выбор параметра]' });
+        setGraphAxisOpen(true);
         break;
       case 'graph-grid':
-        message.info('Сетка: переключена');
+        useViewStore.getState().setGridVisible(!useViewStore.getState().gridVisible);
+        message.success(useViewStore.getState().gridVisible ? 'Сетка: показана' : 'Сетка: скрыта');
         break;
       case 'graph-save':
-        Modal.info({ title: 'Сохранить график', content: 'Формат: .png / .svg / .pdf / .grf' });
+        setGraphSaveOpen(true);
         break;
       case 'table-values':
         navigate('/');
+        break;
+      case 'table-settings':
+        setTableSettingsOpen(true);
+        break;
+      case 'table-export':
+        setTableExportOpen(true);
+        break;
+      case 'table-print-preview':
+        setPrintPreviewOpen(true);
+        break;
+      case 'table-print':
+        setPrintPreviewOpen(true);
         break;
       case 'table-stat':
         setStatisticsOpen(true);
         break;
       case 'proc-tasks':
+      case 'proc-task-list':
         navigate('/processing');
+        break;
+      case 'proc-task-load':
+        setTaskLoadOpen(true);
+        break;
+      case 'proc-task-save':
+        setTaskSaveOpen(true);
         break;
       case 'proc-calc-params':
         setCalcParamsOpen(true);
@@ -226,6 +310,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
       case 'db-param-types':
         setParamTypeOpen(true);
         break;
+      case 'db-compare':
+        setDbCompareOpen(true);
+        break;
+      case 'db-update':
+        setDbUpdateOpen(true);
+        break;
+      case 'db-export':
+        setDbExportOpen(true);
+        break;
+      case 'db-check':
+        setDbCheckOpen(true);
+        break;
       case 'service-piv':
         setPivOpen(true);
         break;
@@ -253,7 +349,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     const handler = (e: KeyboardEvent) => {
       if (e.ctrlKey && e.key === 'o') {
         e.preventDefault();
-        Modal.info({ title: 'Открыть файл', content: 'Ctrl+O: выберите .trj файл' });
+        setTrajOpenOpen(true);
       } else if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
         message.success('Сохранено (Ctrl+S)');
@@ -321,7 +417,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         </div>
         <Space>
           <Tooltip title="Ctrl+O">
-            <Button type="text" icon={<FolderOpenOutlined />} style={{ color: '#fff' }} onClick={() => Modal.info({ title: 'Открыть', content: 'Выберите .trj файл' })} />
+            <Button type="text" icon={<FolderOpenOutlined />} style={{ color: '#fff' }} onClick={() => setTrajOpenOpen(true)} />
           </Tooltip>
           <Tooltip title="Ctrl+S">
             <Button type="text" icon={<SaveOutlined />} style={{ color: '#fff' }} onClick={() => message.success('Сохранено')} />
@@ -352,7 +448,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         <Content style={{ padding: 0, background: bgColor, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <MainMenuBar onMenuClick={handleMenuClick} />
           <div style={toolbarStyle}>
-            <Tooltip title="Открыть (Ctrl+O)"><Button size="small" icon={<FolderOpenOutlined />} onClick={() => Modal.info({ title: 'Открыть', content: 'Выберите .trj файл' })} /></Tooltip>
+            <Tooltip title="Открыть (Ctrl+O)"><Button size="small" icon={<FolderOpenOutlined />} onClick={() => setTrajOpenOpen(true)} /></Tooltip>
             <Tooltip title="Сохранить (Ctrl+S)"><Button size="small" icon={<SaveOutlined />} onClick={() => message.success('Сохранено')} /></Tooltip>
             <Tooltip title="Рассчитать (F5)"><Button size="small" icon={<CalculatorOutlined />} onClick={() => setTrajCalcOpen(true)} /></Tooltip>
             <Tooltip title="Удалить (Del)"><Button size="small" icon={<DeleteOutlined />} onClick={() => Modal.confirm({ title: 'Удалить?', onOk: () => message.success('Удалено') })} /></Tooltip>
@@ -376,7 +472,31 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <StatusBar />
 
       <SelectObjectModal open={selectObjectOpen} onClose={() => setSelectObjectOpen(false)} />
+      <CreateTopicModal open={createTopicOpen} onClose={() => setCreateTopicOpen(false)} />
+      <CreateObjectModal open={createObjectOpen} onClose={() => setCreateObjectOpen(false)} />
       <TrajCalcModal open={trajCalcOpen} onClose={() => setTrajCalcOpen(false)} />
+      <OpenDbModal open={openDbOpen} onClose={() => setOpenDbOpen(false)} />
+      <DbCompareModal open={dbCompareOpen} onClose={() => setDbCompareOpen(false)} />
+      <DbUpdateModal open={dbUpdateOpen} onClose={() => setDbUpdateOpen(false)} />
+      <DbExportModal open={dbExportOpen} onClose={() => setDbExportOpen(false)} />
+      <DbCheckModal open={dbCheckOpen} onClose={() => setDbCheckOpen(false)} />
+      <TrajOpenModal open={trajOpenOpen} onClose={() => setTrajOpenOpen(false)} />
+      <TrajSavePartModal open={trajSavePartOpen} onClose={() => setTrajSavePartOpen(false)} />
+      <TrajDelPartModal open={trajDelPartOpen} onClose={() => setTrajDelPartOpen(false)} />
+      <ScreenSaveModal open={screenSaveOpen} onClose={() => setScreenSaveOpen(false)} />
+      <ScreenSplitModal open={screenSplitOpen} onClose={() => setScreenSplitOpen(false)} />
+      <ScreenWinAddModal open={screenWinAddOpen} onClose={() => setScreenWinAddOpen(false)} />
+      <AddFuncModal open={addFuncOpen} onClose={() => setAddFuncOpen(false)} />
+      <AddValueModal open={addValueOpen} onClose={() => setAddValueOpen(false)} />
+      <GraphLimitsModal open={graphLimitsOpen} onClose={() => setGraphLimitsOpen(false)} />
+      <GraphAutoModal open={graphAutoOpen} onClose={() => setGraphAutoOpen(false)} />
+      <GraphAxisModal open={graphAxisOpen} onClose={() => setGraphAxisOpen(false)} />
+      <GraphSaveModal open={graphSaveOpen} onClose={() => setGraphSaveOpen(false)} />
+      <TableSettingsModal open={tableSettingsOpen} onClose={() => setTableSettingsOpen(false)} />
+      <TableExportModal open={tableExportOpen} onClose={() => setTableExportOpen(false)} />
+      <PrintPreviewModal open={printPreviewOpen} onClose={() => setPrintPreviewOpen(false)} />
+      <TaskLoadModal open={taskLoadOpen} onClose={() => setTaskLoadOpen(false)} />
+      <TaskSaveModal open={taskSaveOpen} onClose={() => setTaskSaveOpen(false)} />
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
       <SyncModal open={syncOpen} onClose={() => setSyncOpen(false)} />

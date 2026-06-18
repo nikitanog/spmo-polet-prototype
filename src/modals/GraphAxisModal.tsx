@@ -1,0 +1,66 @@
+import { useState, useEffect } from 'react';
+import { Modal, Select, Button, Alert, Typography, Space } from 'antd';
+import { useGraphStore } from '../stores/useGraphStore';
+
+const { Text } = Typography;
+
+interface GraphAxisModalProps {
+  open: boolean;
+  onClose: () => void;
+}
+
+export default function GraphAxisModal({ open, onClose }: GraphAxisModalProps) {
+  const { xAxisParam, setXAxisParam } = useGraphStore();
+  const [local, setLocal] = useState<string | null>(xAxisParam);
+
+  useEffect(() => {
+    if (open) setLocal(xAxisParam);
+  }, [open, xAxisParam]);
+
+  const handleApply = () => {
+    setXAxisParam(local);
+    onClose();
+  };
+
+  const handleClose = () => {
+    setLocal(xAxisParam);
+    onClose();
+  };
+
+  const axisOptions = [
+    { value: '', label: 'Время (по умолчанию)' },
+    { value: 'Параметр_001', label: 'Параметр_001' },
+    { value: 'Параметр_002', label: 'Параметр_002' },
+    { value: 'Параметр_010', label: 'Параметр_010' },
+  ];
+
+  return (
+    <Modal
+      title="Свойства шкалы оси X"
+      open={open}
+      onCancel={handleClose}
+      onOk={handleApply}
+      okText="Применить"
+      cancelText="Отмена"
+      width={450}
+    >
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 8 }}>
+        <div>
+          <Text strong style={{ display: 'block', marginBottom: 4 }}>Ось X</Text>
+          <Select
+            style={{ width: '100%' }}
+            value={local}
+            onChange={setLocal}
+            options={axisOptions}
+          />
+        </div>
+        <Alert
+          type="info"
+          showIcon
+          message={local ? `Ось X: ${local}` : 'Ось X: время (отсчёты)'}
+          description="Выберите параметр для отображения на оси X вместо времени."
+        />
+      </div>
+    </Modal>
+  );
+}
