@@ -1,6 +1,9 @@
-import { useState } from 'react';
-import { Layout, Modal, message } from 'antd';
+import { useEffect, useState, useCallback } from 'react';
+import { Layout, Modal, message, Space, Button, Dropdown, Tooltip } from 'antd';
 import { useNavigate } from 'react-router-dom';
+import {
+  FolderOpenOutlined, SaveOutlined, CalculatorOutlined, DeleteOutlined,
+} from '@ant-design/icons';
 import MainMenuBar from '../components/main-menu/MainMenuBar';
 import ObjectTree from '../components/sidebar/ObjectTree';
 import StatusBar from '../components/common/StatusBar';
@@ -9,6 +12,10 @@ import TrajCalcModal from '../modals/TrajCalcModal';
 import SettingsModal from '../modals/SettingsModal';
 import ExportModal from '../modals/ExportModal';
 import SyncModal from '../modals/SyncModal';
+import ImportWizardModal from '../modals/ImportWizardModal';
+import FaultsModal from '../modals/FaultsModal';
+import StatisticsModal from '../modals/StatisticsModal';
+import SampleModal from '../modals/SampleModal';
 import { useAppStore } from '../stores/useAppStore';
 
 const { Header, Sider, Content } = Layout;
@@ -27,11 +34,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
   const [syncOpen, setSyncOpen] = useState(false);
+  const [importOpen, setImportOpen] = useState(false);
+  const [faultsOpen, setFaultsOpen] = useState(false);
+  const [statisticsOpen, setStatisticsOpen] = useState(false);
+  const [sampleOpen, setSampleOpen] = useState(false);
 
-  const handleMenuClick = (key: string) => {
+  useEffect(() => {
+    setSelectObjectOpen(true);
+  }, []);
+
+  const handleMenuClick = useCallback((key: string) => {
     switch (key) {
       case 'object-select':
         setSelectObjectOpen(true);
+        break;
+      case 'object-create-topic':
+      case 'object-create-object':
+        Modal.info({ title: key === 'object-create-topic' ? 'Создать тему' : 'Создать объект', content: `Диалог создания — макет. Имя: [поле ввода]` });
         break;
       case 'object-exit':
         Modal.confirm({ title: 'Завершить работу с СПМО «Полёт»?', onOk: () => window.close() });
@@ -40,38 +59,37 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setTrajCalcOpen(true);
         break;
       case 'traj-open':
-        message.info('Выберите .trj файл для открытия');
-        break;
-      case 'marker-set':
-        message.info('Установите маркер на графике или через панель маркеров');
-        break;
-      case 'screen-create':
-        message.info('Создать новый экран');
-        break;
-      case 'graph-add-func':
-        message.info('Добавить функцию на график');
-        break;
-      case 'table-values':
-        message.info('Открыть таблицу значений параметров');
-        break;
-      case 'proc-tasks':
-        message.info('Открыть список задач вторичной обработки');
-        break;
-      case 'service-settings':
-        setSettingsOpen(true);
-        break;
-      case 'help-about':
-        Modal.info({ title: 'О программе', content: 'СПМО «Полёт» версия 5. Прототип UI.' });
-        break;
-      case 'traj-faults-time':
-        message.info('Анализ сбоев времени ТН');
-        break;
-      case 'traj-faults-param':
-        message.info('Поиск сбоев заданного параметра');
+        Modal.info({ title: 'Открыть файл', content: 'Выберите .trj файл для открытия. Фильтр: *.trj' });
         break;
       case 'traj-close':
         useAppStore.getState().setActiveTrajectory(null);
-        message.info('Траектория закрыта');
+        message.success('Траектория закрыта');
+        break;
+      case 'traj-save-as':
+        Modal.info({ title: 'Сохранить как', content: 'Диалог сохранения траектории. Имя файла: [ввод], формат: .trj' });
+        break;
+      case 'traj-save-part':
+        Modal.info({ title: 'Сохранить часть траектории', content: 'Выберите интервал: от [время] до [время]. Имя файла: [ввод]' });
+        break;
+      case 'traj-del-part':
+        Modal.info({ title: 'Удалить часть траектории', content: 'Выберите интервал для удаления: от [время] до [время]' });
+        break;
+      case 'traj-faults-time':
+      case 'traj-faults-param':
+        setFaultsOpen(true);
+        break;
+      case 'marker-set':
+        message.info('Кликните на графике для установки маркера');
+        break;
+      case 'marker-del':
+        message.info('Выберите маркер для удаления');
+        break;
+      case 'marker-del-all':
+        Modal.confirm({ title: 'Удалить все маркеры?', onOk: () => message.success('Все маркеры удалены') });
+        break;
+      case 'sample-save':
+      case 'sample-add':
+        setSampleOpen(true);
         break;
       case 'db-view':
       case 'db-current':
@@ -79,24 +97,105 @@ export default function MainLayout({ children }: MainLayoutProps) {
         navigate('/db');
         break;
       case 'db-calc':
-        message.info('Открыть расчётную БД');
+        Modal.info({ title: 'Расчётная БД', content: 'Просмотр расчётной базы данных' });
         break;
       case 'db-change':
         Modal.info({ title: 'Сменить БД', content: 'Выберите другую базу данных СБИ' });
         break;
       case 'db-open':
-        message.info('Выберите файл БД для открытия');
+        Modal.info({ title: 'Открыть БД', content: 'Выберите файл базы данных (*.csv, *.dbf, *.db)' });
         break;
-      case 'screen-open':
       case 'screen-create':
+      case 'screen-open':
         navigate('/screen');
         break;
+      case 'screen-save':
+        message.success('Экран сохранён');
+        break;
+      case 'screen-save-as':
+        Modal.info({ title: 'Сохранить экран как', content: 'Имя файла: [ввод], формат: .scr' });
+        break;
       case 'screen-win-add':
-        message.info('Добавить рабочее окно на экран');
+        Modal.info({ title: 'Добавить рабочее окно', content: 'Тип: график / таблица / комбинированное' });
+        break;
+      case 'screen-win-del':
+        Modal.confirm({ title: 'Удалить рабочее окно?', onOk: () => message.success('Окно удалено') });
+        break;
+      case 'screen-win-clear':
+        Modal.confirm({ title: 'Очистить содержимое окна?', onOk: () => message.success('Окно очищено') });
+        break;
+      case 'screen-win-rename':
+        Modal.info({ title: 'Переименовать окно', content: 'Новое имя: [поле ввода]' });
+        break;
+      case 'screen-win-move':
+        Modal.info({ title: 'Переместить/Копировать', content: 'Выберите позицию назначения' });
+        break;
+      case 'screen-split':
+        message.info('Рабочая область разделена на 2 экрана');
+        break;
+      case 'view-scales':
+        message.info('Шкалы параметров: показаны');
+        break;
+      case 'view-values-list':
+        message.info('Текущие значения: режим списка');
+        break;
+      case 'view-values-table':
+        message.info('Текущие значения: режим таблицы');
+        break;
+      case 'view-values-off':
+        message.info('Текущие значения: скрыты');
+        break;
+      case 'cursor-cross':
+        message.info('Курсор: перекрестье');
+        break;
+      case 'cursor-cross-val':
+        message.info('Курсор: перекрестье со значениями');
+        break;
+      case 'cursor-arrow':
+        message.info('Курсор: стрелка');
+        break;
+      case 'cursor-vline':
+        message.info('Курсор: вертикальная линия');
+        break;
+      case 'graph-add-func':
+        Modal.info({ title: 'Добавить функцию', content: 'Выберите параметр из дерева. Поиск: [строка]' });
+        break;
+      case 'graph-add-val':
+        Modal.info({ title: 'Добавить значение', content: 'Выберите параметр для отображения текущего значения' });
+        break;
+      case 'graph-limits':
+        Modal.info({ title: 'Пределы функции', content: 'Min: [авто/вручную], Max: [авто/вручную]' });
+        break;
+      case 'graph-auto':
+        Modal.info({ title: 'Автопостроение', content: 'Выберите несколько параметров. Будет применён авто-масштаб.' });
+        break;
+      case 'graph-axis':
+        Modal.info({ title: 'Свойства шкалы оси X', content: 'Ось X: время / [выбор параметра]' });
+        break;
+      case 'graph-grid':
+        message.info('Сетка: переключена');
+        break;
+      case 'graph-save':
+        Modal.info({ title: 'Сохранить график', content: 'Формат: .png / .svg / .pdf / .grf' });
+        break;
+      case 'table-values':
+        message.info('Откройте таблицу значений на странице workspace или перейдите по меню');
+        break;
+      case 'table-stat':
+        setStatisticsOpen(true);
         break;
       case 'proc-tasks':
       case 'proc-calc-params':
         navigate('/processing');
+        break;
+      case 'proc-gfx-editor':
+        Modal.info({ title: 'Графический редактор', content: 'Создание и редактирование шаблонов графиков. Макет, легенда, линии, текст.' });
+        break;
+      case 'import-text':
+      case 'import-excel':
+      case 'import-binary':
+      case 'import-dirac':
+        setImportOpen(true);
         break;
       case 'export-binary':
       case 'export-usm':
@@ -107,14 +206,41 @@ export default function MainLayout({ children }: MainLayoutProps) {
       case 'sync-manual':
         setSyncOpen(true);
         break;
+      case 'service-settings':
+        setSettingsOpen(true);
+        break;
+      case 'help-f1':
+        Modal.info({ title: 'Справка', content: 'СПМО «Полёт» версия 5. Руководство оператора. Раздел: справка по программе.' });
+        break;
+      case 'help-about':
+        Modal.info({ title: 'О программе', content: 'СПМО «Полёт» версия 5. Прототип UI. Разработка: НИЦ «Полёт».' });
+        break;
       default:
-        if (key.startsWith('import-')) {
-          message.info(`Открыть: ${key.replace(/-/g, ' ')}`);
-        } else {
-          message.info(`Команда: ${key}`);
-        }
+        message.info(`Команда: ${key}`);
     }
-  };
+  }, [navigate]);
+
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if (e.ctrlKey && e.key === 'o') {
+        e.preventDefault();
+        Modal.info({ title: 'Открыть файл', content: 'Ctrl+O: выберите .trj файл' });
+      } else if (e.ctrlKey && e.key === 's') {
+        e.preventDefault();
+        message.success('Сохранено (Ctrl+S)');
+      } else if (e.key === 'F5') {
+        e.preventDefault();
+        setTrajCalcOpen(true);
+      } else if (e.key === 'Delete') {
+        Modal.confirm({ title: 'Удалить выделенный объект?', onOk: () => message.success('Объект удалён') });
+      } else if (e.altKey && e.key === 'F4') {
+        e.preventDefault();
+        Modal.confirm({ title: 'Завершить работу?', onOk: () => window.close() });
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
+  }, []);
 
   const isFlight = mode === 'flight';
   const bgColor = isFlight ? '#1a1a2e' : '#f5f5f5';
@@ -122,6 +248,23 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   document.documentElement.style.setProperty('--bg', bgColor);
   document.documentElement.style.setProperty('--text', textColor);
+
+  const toolbarStyle: React.CSSProperties = {
+    background: isFlight ? '#0d1b3e' : '#fff',
+    borderBottom: `1px solid ${isFlight ? '#1a3a6a' : '#d9d9d9'}`,
+    padding: '4px 12px',
+    display: 'flex',
+    gap: 4,
+    alignItems: 'center',
+  };
+
+  const ctxMenuItems = [
+    { key: 'marker-set', label: 'Установить маркер' },
+    { key: 'graph-add-func', label: 'Добавить функцию' },
+    { type: 'divider' as const },
+    { key: 'table-stat', label: 'Статистика' },
+    { key: 'traj-faults-time', label: 'Сбои времени' },
+  ];
 
   return (
     <Layout style={{ minHeight: '100vh', background: bgColor, color: textColor }}>
@@ -147,9 +290,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
             {isFlight ? 'ПОЛЁТ' : 'АНАЛИЗ'}
           </span>
         </div>
-        <div>
+        <Space>
+          <Tooltip title="Ctrl+O">
+            <Button type="text" icon={<FolderOpenOutlined />} style={{ color: '#fff' }} onClick={() => Modal.info({ title: 'Открыть', content: 'Выберите .trj файл' })} />
+          </Tooltip>
+          <Tooltip title="Ctrl+S">
+            <Button type="text" icon={<SaveOutlined />} style={{ color: '#fff' }} onClick={() => message.success('Сохранено')} />
+          </Tooltip>
+          <Tooltip title="F5 — расчёт">
+            <Button type="text" icon={<CalculatorOutlined />} style={{ color: '#fff' }} onClick={() => setTrajCalcOpen(true)} />
+          </Tooltip>
           <button
-            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.5)', color: '#fff', borderRadius: 4, padding: '4px 12px', cursor: 'pointer' }}
+            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.5)', color: '#fff', borderRadius: 4, padding: '4px 12px', cursor: 'pointer', marginLeft: 8 }}
             onClick={() => {
               Modal.confirm({
                 title: `Переключиться в режим «${isFlight ? 'Анализ' : 'Полёт'}»?`,
@@ -159,7 +311,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           >
             Переключить режим
           </button>
-        </div>
+        </Space>
       </Header>
       <Layout>
         <Sider
@@ -171,10 +323,25 @@ export default function MainLayout({ children }: MainLayoutProps) {
         >
           <ObjectTree />
         </Sider>
-        <Content style={{ padding: 16, background: bgColor, overflow: 'auto' }}>
+        <Content style={{ padding: 0, background: bgColor, overflow: 'auto', display: 'flex', flexDirection: 'column' }}>
           <MainMenuBar onMenuClick={handleMenuClick} />
-          <div style={{ marginTop: 12 }}>
-            {children}
+          <div style={toolbarStyle}>
+            <Tooltip title="Открыть (Ctrl+O)"><Button size="small" icon={<FolderOpenOutlined />} onClick={() => Modal.info({ title: 'Открыть', content: 'Выберите .trj файл' })} /></Tooltip>
+            <Tooltip title="Сохранить (Ctrl+S)"><Button size="small" icon={<SaveOutlined />} onClick={() => message.success('Сохранено')} /></Tooltip>
+            <Tooltip title="Рассчитать (F5)"><Button size="small" icon={<CalculatorOutlined />} onClick={() => setTrajCalcOpen(true)} /></Tooltip>
+            <Tooltip title="Удалить (Del)"><Button size="small" icon={<DeleteOutlined />} onClick={() => Modal.confirm({ title: 'Удалить?', onOk: () => message.success('Удалено') })} /></Tooltip>
+          </div>
+          <div
+            style={{ flex: 1, padding: 16 }}
+            onContextMenu={(e) => {
+              e.preventDefault();
+            }}
+          >
+            <Dropdown menu={{ items: ctxMenuItems, onClick: ({ key }) => handleMenuClick(key) }} trigger={['contextMenu']}>
+              <div style={{ minHeight: '100%' }}>
+                {children}
+              </div>
+            </Dropdown>
           </div>
         </Content>
       </Layout>
@@ -185,6 +352,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <SettingsModal open={settingsOpen} onClose={() => setSettingsOpen(false)} />
       <ExportModal open={exportOpen} onClose={() => setExportOpen(false)} />
       <SyncModal open={syncOpen} onClose={() => setSyncOpen(false)} />
+      <ImportWizardModal open={importOpen} onClose={() => setImportOpen(false)} />
+      <FaultsModal open={faultsOpen} onClose={() => setFaultsOpen(false)} />
+      <StatisticsModal open={statisticsOpen} onClose={() => setStatisticsOpen(false)} />
+      <SampleModal open={sampleOpen} onClose={() => setSampleOpen(false)} />
     </Layout>
   );
 }
