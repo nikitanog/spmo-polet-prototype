@@ -33,7 +33,6 @@ interface MainLayoutProps {
 
 export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate();
-  const [collapsed, setCollapsed] = useState(false);
   const { mode, setMode } = useAppStore();
 
   const [selectObjectOpen, setSelectObjectOpen] = useState(false);
@@ -346,13 +345,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <Layout>
         <Sider
           width={220}
-          collapsedWidth={52}
-          collapsed={collapsed}
-          collapsible
-          onCollapse={setCollapsed}
-          style={{ background: isFlight ? '#16213e' : '#fafafa', borderRight: '1px solid #d9d9d9', overflow: 'hidden' }}
+          style={{ background: isFlight ? '#16213e' : '#fafafa', borderRight: '1px solid #d9d9d9' }}
         >
-          <ObjectTree collapsed={collapsed} />
+          <ObjectTree />
         </Sider>
         <Content style={{ padding: 0, background: bgColor, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <MainMenuBar onMenuClick={handleMenuClick} />
