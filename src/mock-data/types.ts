@@ -36,3 +36,21 @@ export interface Trajectory {
   params: string[];
   data: Record<string, number[]>;
 }
+
+export interface Alarm {
+  id: string;
+  param: string;
+  value: number;
+  threshold: number;
+  status: 'critical' | 'warning';
+  time: number;
+  message: string;
+}
+
+export interface TelemetryValue {
+  id: string;
+  name: string;
+  value: number;
+  unit: string;
+  status: 'ok' | 'warning' | 'critical';
+}

@@ -1,16 +1,11 @@
-import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { ConfigProvider, theme as antTheme } from 'antd';
 import MainLayout from './layouts/MainLayout';
+import WorkspacePage from './components/screens/WorkspacePage';
+import DatabasePage from './components/database/DatabasePage';
+import ScreenPage from './components/screens/ScreenPage';
+import ProcessingPage from './components/processing/ProcessingPage';
 import { useAppStore } from './stores/useAppStore';
-
-function Home() {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 16 }}>
-      <h2 style={{ margin: 0 }}>Добро пожаловать в СПМО «Полёт» версия 5</h2>
-      <p style={{ color: '#888' }}>Выберите объект и откройте траекторию для начала работы</p>
-    </div>
-  );
-}
 
 export default function App() {
   const mode = useAppStore((s) => s.mode);
@@ -29,8 +24,10 @@ export default function App() {
       <BrowserRouter>
         <MainLayout>
           <Routes>
-            <Route path="/" element={<Home />} />
-            <Route path="*" element={<Navigate to="/" replace />} />
+            <Route path="/" element={<WorkspacePage />} />
+            <Route path="/db" element={<DatabasePage />} />
+            <Route path="/screen" element={<ScreenPage />} />
+            <Route path="/processing" element={<ProcessingPage />} />
           </Routes>
         </MainLayout>
       </BrowserRouter>

@@ -74,7 +74,18 @@ export const mockTimeFaults = [
   { id: 'tf3', start: 2200, end: 2210, duration: 10, type: 'Пропуск данных' },
 ];
 
-export const mockScreens = [
+interface ScreenWindow {
+  type: 'graph' | 'table' | 'video' | 'map';
+  params: string[];
+}
+
+interface Screen {
+  id: string;
+  name: string;
+  windows: ScreenWindow[];
+}
+
+export const mockScreens: Screen[] = [
   { id: 's1', name: 'Основной экран', windows: [{ type: 'graph', params: ['Параметр_001', 'Параметр_002'] }, { type: 'table', params: ['Параметр_001'] }] },
   { id: 's2', name: 'Детальный анализ', windows: [{ type: 'graph', params: ['Параметр_010', 'Параметр_020', 'Параметр_050'] }] },
 ];
@@ -94,4 +105,26 @@ export const mockUsers = [
   { id: 'u1', name: 'Иванов И.И.', role: 'Оператор' },
   { id: 'u2', name: 'Петров П.П.', role: 'Аналитик' },
   { id: 'u3', name: 'Сидоров С.С.', role: 'Администратор БДП' },
+];
+
+import type { Alarm } from './types';
+
+export const mockAlarms: Alarm[] = [
+  { id: 'a1', param: 'Параметр_001', value: 156.2, threshold: 150, status: 'critical' as const, time: 1450, message: 'Превышение давления в камере 1' },
+  { id: 'a2', param: 'Параметр_010', value: 245.1, threshold: 200, status: 'warning' as const, time: 1620, message: 'Температура выше нормы' },
+  { id: 'a3', param: 'Параметр_050', value: 12.4, threshold: 10, status: 'critical' as const, time: 1780, message: 'Падение напряжения питания' },
+  { id: 'a4', param: 'Параметр_002', value: 89.3, threshold: 90, status: 'warning' as const, time: 1900, message: 'Вибрация близка к пределу' },
+];
+
+export const mockTelemetryValues = [
+  { id: 'tv1', name: 'Высота', value: 10500, unit: 'м', status: 'ok' as const },
+  { id: 'tv2', name: 'Скорость', value: 2450, unit: 'км/ч', status: 'ok' as const },
+  { id: 'tv3', name: 'Температура КА-1', value: 187, unit: '°C', status: 'warning' as const },
+  { id: 'tv4', name: 'Давление КА-1', value: 3.2, unit: 'атм', status: 'ok' as const },
+  { id: 'tv5', name: 'Напряжение БС', value: 27.4, unit: 'В', status: 'ok' as const },
+  { id: 'tv6', name: 'Ток БС', value: 12.8, unit: 'А', status: 'ok' as const },
+  { id: 'tv7', name: 'Расход топлива', value: 45.2, unit: '%', status: 'ok' as const },
+  { id: 'tv8', name: 'Обороты НА-1', value: 28500, unit: 'об/мин', status: 'warning' as const },
+  { id: 'tv9', name: 'Вибрация', value: 2.4, unit: 'g', status: 'ok' as const },
+  { id: 'tv10', name: 'СПМО статус', value: 1, unit: '', status: 'ok' as const },
 ];
