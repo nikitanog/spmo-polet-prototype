@@ -1,6 +1,8 @@
 import { useState } from 'react';
-import { Modal, Form, Input, Button, Alert, Typography } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Form, Input, Button, Alert, Typography, Space, message } from 'antd';
+import { SaveOutlined, DesktopOutlined } from '@ant-design/icons';
+import { useAppStore } from '../stores/useAppStore';
 
 const { Text } = Typography;
 
@@ -10,10 +12,28 @@ interface SampleModalProps {
 }
 
 export default function SampleModal({ open, onClose }: SampleModalProps) {
+  const navigate = useNavigate();
   const [saved, setSaved] = useState(false);
+  const [sampleName, setSampleName] = useState('sample_001');
+  const trajectories = useAppStore((s) => s.trajectories);
+  const markers = useAppStore((s) => s.markers);
 
   const handleSave = () => {
     setSaved(true);
+  };
+
+  const handleOpenOnWorkspace = () => {
+    const newTraj = {
+      id: `trj-sample-${Date.now()}`,
+      name: `${sampleName}.smp`,
+      params: trajectories[0]?.params || [],
+      data: trajectories[0]?.data || {},
+    };
+    useAppStore.getState().addTrajectory(newTraj);
+    message.success(`Выборка «${sampleName}.smp» открыта как траектория`);
+    setSaved(false);
+    onClose();
+    navigate('/');
   };
 
   const handleClose = () => {
@@ -32,13 +52,17 @@ export default function SampleModal({ open, onClose }: SampleModalProps) {
       {!saved ? (
         <Form layout="vertical">
           <Form.Item label="Имя файла выборки">
-            <Input defaultValue="sample_001.smp" addonAfter=".smp" />
+            <Input
+              defaultValue="sample_001"
+              addonAfter=".smp"
+              onChange={(e) => setSampleName(e.target.value)}
+            />
           </Form.Item>
           <Form.Item label="Описание">
             <Input.TextArea rows={3} placeholder="Описание выборки (опционально)" />
           </Form.Item>
           <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-            Будут сохранены все установленные маркеры (текущий набор: 5 маркеров)
+            Будут сохранены все установленные маркеры (текущий набор: {markers.length} маркеров)
           </Text>
           <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>Сохранить</Button>
         </Form>
@@ -47,8 +71,15 @@ export default function SampleModal({ open, onClose }: SampleModalProps) {
           type="success"
           showIcon
           message="Выборка сохранена"
-          description="Файл sample_001.smp содержит 5 маркированных точек."
-          action={<Button size="small" onClick={handleClose}>Закрыть</Button>}
+          description={`Файл ${sampleName}.smp содержит ${markers.length} маркированных точек.`}
+          action={
+            <Space>
+              <Button size="small" type="primary" icon={<DesktopOutlined />} onClick={handleOpenOnWorkspace}>
+                Открыть в рабочем окне
+              </Button>
+              <Button size="small" onClick={handleClose}>Закрыть</Button>
+            </Space>
+          }
         />
       )}
     </Modal>

@@ -22,6 +22,19 @@ export default function TableExportModal({ open, onClose }: TableExportModalProp
 
   const handleExport = () => {
     if (!fileName.trim()) return;
+    if (format === '.csv') {
+      const rows = Array.from({ length: 100 }, (_, i) =>
+        `Отсчёт ${i},${Math.round(50 + Math.sin(i / 10) * 30 * 100) / 100},${Math.round(100 + Math.cos(i / 15) * 40 * 100) / 100},${Math.round(Math.random() * 100 * 100) / 100}`
+      );
+      const csv = '\uFEFFПараметр_001,Параметр_002,Параметр_010,Параметр_020\n' + rows.join('\n');
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${fileName}.csv`;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
     setExported(true);
   };
 

@@ -1,5 +1,8 @@
 import { useState } from 'react';
-import { Modal, Form, Select, InputNumber, Button, Progress, Alert, Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Form, Select, InputNumber, Button, Progress, Alert, Typography, Space, Tag, message } from 'antd';
+import { DesktopOutlined, PlusOutlined } from '@ant-design/icons';
+import { useGraphStore } from '../stores/useGraphStore';
 
 const { Text } = Typography;
 
@@ -8,7 +11,18 @@ interface TensoParamsModalProps {
   onClose: () => void;
 }
 
+const mockTensoResults = [
+  { id: 'tnz_001', name: 'Деформация_осевая', value: 0.042, unit: 'мм/мм' },
+  { id: 'tnz_002', name: 'Деформация_поперечная', value: -0.015, unit: 'мм/мм' },
+  { id: 'tnz_003', name: 'Напряжение_продольное', value: 126.5, unit: 'МПа' },
+  { id: 'tnz_004', name: 'Напряжение_касательное', value: 34.2, unit: 'МПа' },
+  { id: 'tnz_005', name: 'Коэффициент_Пуассона', value: 0.31, unit: '' },
+  { id: 'tnz_006', name: 'Модуль_упругости', value: 2.1e5, unit: 'МПа' },
+];
+
 export default function TensoParamsModal({ open, onClose }: TensoParamsModalProps) {
+  const navigate = useNavigate();
+  const { addFunction } = useGraphStore();
   const [step, setStep] = useState(0);
   const [progress, setProgress] = useState(0);
 
@@ -65,7 +79,41 @@ export default function TensoParamsModal({ open, onClose }: TensoParamsModalProp
         </div>
       )}
       {step === 2 && (
-        <Alert type="success" showIcon message="Расчёт завершён" description="Тензопараметры рассчитаны и добавлены в рабочую область." action={<Button size="small" onClick={() => { setStep(0); setProgress(0); onClose(); }}>Закрыть</Button>} />
+        <div>
+          <Alert type="success" showIcon message="Расчёт завершён" description="Тензопараметры рассчитаны." style={{ marginBottom: 12 }} />
+          <Text strong>Результаты:</Text>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8, marginTop: 8, marginBottom: 12 }}>
+            {mockTensoResults.map((r) => (
+              <Tag key={r.id} color="purple" style={{ fontSize: 12, padding: '2px 8px' }}>
+                {r.name}: {r.value}{r.unit ? ` ${r.unit}` : ''}
+              </Tag>
+            ))}
+          </div>
+          <Space>
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => {
+              mockTensoResults.forEach((r) => {
+                addFunction({
+                  id: `tnz-${r.id}`,
+                  paramName: r.name,
+                  color: '#722ed1',
+                  thickness: 1.5,
+                  lineType: 'solid',
+                  scale: 'left',
+                  baseline: 0,
+                  visible: true,
+                });
+              });
+              message.success(`${mockTensoResults.length} тензопараметров добавлены на график`);
+              setStep(0);
+              setProgress(0);
+              onClose();
+              navigate('/');
+            }}>
+              Добавить на график
+            </Button>
+            <Button onClick={() => { setStep(0); setProgress(0); onClose(); }}>Закрыть</Button>
+          </Space>
+        </div>
       )}
     </Modal>
   );

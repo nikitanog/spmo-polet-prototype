@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Modal, Tree, List, Typography } from 'antd';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Tree, List, Typography, message } from 'antd';
 import { useAppStore } from '../stores/useAppStore';
 
 const { Text } = Typography;
@@ -10,6 +11,7 @@ interface SelectObjectModalProps {
 }
 
 export default function SelectObjectModal({ open, onClose }: SelectObjectModalProps) {
+  const navigate = useNavigate();
   const { themes, selectedTopicId, selectedObjectId, selectTopic, selectObject } = useAppStore();
   const [localTopicId, setLocalTopicId] = useState<string | null>(selectedTopicId);
   const [localObjectId, setLocalObjectId] = useState<string | null>(selectedObjectId);
@@ -24,8 +26,13 @@ export default function SelectObjectModal({ open, onClose }: SelectObjectModalPr
 
   const handleOk = () => {
     if (localTopicId) selectTopic(localTopicId);
-    if (localObjectId) selectObject(localObjectId);
+    if (localObjectId) {
+      selectObject(localObjectId);
+      const objName = themes.flatMap(t => t.objects).find(o => o.id === localObjectId)?.name || localObjectId;
+      message.success(`Выбран объект: ${objName}`);
+    }
     onClose();
+    navigate('/');
   };
 
   return (
@@ -37,7 +44,7 @@ export default function SelectObjectModal({ open, onClose }: SelectObjectModalPr
       okText="Выбрать"
       cancelText="Отмена"
       width={640}
-      bodyStyle={{ padding: '12px 0' }}
+      styles={{ body: { padding: '12px 0' } }}
     >
       <div style={{ display: 'flex', gap: 16, minHeight: 300 }}>
         <div style={{ width: 240, borderRight: '1px solid #d9d9d9', paddingRight: 12 }}>

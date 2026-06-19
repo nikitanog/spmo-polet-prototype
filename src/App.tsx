@@ -7,6 +7,7 @@ import DbEditorPage from './components/database/DbEditorPage';
 import ScreenPage from './components/screens/ScreenPage';
 import ScreenManagerPage from './components/screens/ScreenManagerPage';
 import ProcessingPage from './components/processing/ProcessingPage';
+import HelpPage from './components/help/HelpPage';
 import { useAppStore } from './stores/useAppStore';
 
 export default function App() {
@@ -32,6 +33,7 @@ export default function App() {
             <Route path="/screen" element={<ScreenPage />} />
             <Route path="/screens" element={<ScreenManagerPage />} />
             <Route path="/processing" element={<ProcessingPage />} />
+            <Route path="/help" element={<HelpPage />} />
           </Routes>
         </MainLayout>
       </BrowserRouter>

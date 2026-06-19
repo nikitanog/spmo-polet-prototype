@@ -1,10 +1,11 @@
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Card, Select, Empty, Typography, Modal, Input } from 'antd';
+import { Card, Select, Empty, Typography, Modal, Input, message as msg } from 'antd';
 import * as echarts from 'echarts/core';
 import { LineChart } from 'echarts/charts';
 import { GridComponent, TooltipComponent, DataZoomComponent, MarkLineComponent } from 'echarts/components';
 import { CanvasRenderer } from 'echarts/renderers';
 import { useAppStore } from '../../stores/useAppStore';
+import { useGraphStore } from '../../stores/useGraphStore';
 import { useViewStore } from '../../stores/useViewStore';
 
 const { confirm } = Modal;
@@ -13,22 +14,36 @@ echarts.use([LineChart, GridComponent, TooltipComponent, DataZoomComponent, Mark
 
 const { Text } = Typography;
 
+const COLORS = ['#1677ff', '#ff4d4f', '#52c41a', '#faad14', '#722ed1', '#13c2c2'];
+
 export default function TrajectoryChart() {
   const chartRef = useRef<HTMLDivElement>(null);
   const instanceRef = useRef<echarts.ECharts | null>(null);
-  const { activeTrajectoryId, trajectories, markers } = useAppStore();
-  const { scalesVisible, gridVisible, cursorMode } = useViewStore();
-  const [selectedParams, setSelectedParams] = useState<string[]>([]);
+  const { activeTrajectoryId, trajectories, markers, markerSetMode, setMarkerSetMode, addMarker, removeMarker } = useAppStore();
+  const { scalesVisible, gridVisible, cursorMode, valuesMode } = useViewStore();
+  const graphFunctions = useGraphStore((s) => s.functions);
+  const { addFunction, removeFunction } = useGraphStore();
 
   const traj = trajectories.find((t) => t.id === activeTrajectoryId);
   const data = traj?.data || {};
   const allParams = traj?.params || [];
 
   useEffect(() => {
-    if (allParams.length > 0 && selectedParams.length === 0) {
-      setSelectedParams(allParams.slice(0, 3));
+    if (allParams.length > 0 && graphFunctions.length === 0) {
+      allParams.slice(0, 3).forEach((p, i) => {
+        addFunction({
+          id: `gf-auto-${p}`,
+          paramName: p,
+          color: COLORS[i % COLORS.length],
+          thickness: 1.5,
+          lineType: 'solid',
+          scale: 'left',
+          baseline: 0,
+          visible: true,
+        });
+      });
     }
-  }, [allParams.join(',')]);
+  }, [traj?.params?.join(',')]);
 
   useEffect(() => {
     if (!chartRef.current) return;
@@ -37,55 +52,68 @@ export default function TrajectoryChart() {
     }
     const chart = instanceRef.current;
 
-    if (selectedParams.length === 0 || !traj) {
+    const visibleFns = graphFunctions.filter((f) => f.visible);
+    if (visibleFns.length === 0 || !traj) {
       chart.clear();
       return;
     }
 
     const timeData = Array.from({ length: 3000 }, (_, i) => i);
-    const colors = ['#1677ff', '#ff4d4f', '#52c41a', '#faad14', '#722ed1', '#13c2c2'];
 
-    const series = selectedParams.map((param, idx) => ({
-      name: param,
+    const series = visibleFns.map((fn) => ({
+      name: fn.paramName,
       type: 'line' as const,
-      data: data[param]
-        ? data[param].map((v, i) => [timeData[i], v])
+      data: data[fn.paramName]
+        ? data[fn.paramName].map((v, i) => [timeData[i], v])
         : [],
       smooth: false,
       symbol: 'none',
-      lineStyle: { width: 1.5 },
-      itemStyle: { color: colors[idx % colors.length] },
+      lineStyle: { width: fn.thickness, type: fn.lineType },
+      itemStyle: { color: fn.color },
     }));
 
     chart.off('click');
     chart.on('click', (params: any) => {
       const time = params.data?.[0] ?? params.value?.[0] ?? Math.round(params.xValue ?? 0);
       if (time == null || typeof time !== 'number') return;
-      let comment = '';
-      confirm({
-        title: 'Установить маркер',
-        content: (
-          <div style={{ marginTop: 8 }}>
-            <div style={{ marginBottom: 4, fontSize: 12, color: '#888' }}>Время: {Math.round(time)} отсчётов</div>
-            <Input
-              placeholder="Комментарий (например: Взлёт)"
-              onChange={(e) => { comment = e.target.value; }}
-              onKeyDown={(e) => e.stopPropagation()}
-            />
-          </div>
-        ),
-        onOk: () => {
-          if (comment.trim()) {
-            useAppStore.getState().addMarker({
-              id: `m${Date.now()}`,
-              time: Math.round(time),
-              comment: comment.trim(),
-            });
-          }
-        },
-        okText: 'Добавить',
-        cancelText: 'Отмена',
-      });
+
+      if (markerSetMode === 'set') {
+        let comment = '';
+        confirm({
+          title: 'Установить маркер',
+          content: (
+            <div style={{ marginTop: 8 }}>
+              <div style={{ marginBottom: 4, fontSize: 12, color: '#888' }}>Время: {Math.round(time)} отсчётов</div>
+              <Input
+                placeholder="Комментарий (например: Взлёт)"
+                onChange={(e) => { comment = e.target.value; }}
+                onKeyDown={(e) => e.stopPropagation()}
+              />
+            </div>
+          ),
+          onOk: () => {
+            addMarker({ id: `m${Date.now()}`, time: Math.round(time), comment: comment.trim() || `Маркер @${Math.round(time)}` });
+            setMarkerSetMode('off');
+            msg.success('Маркер добавлен');
+          },
+          okText: 'Добавить',
+          cancelText: 'Отмена',
+        });
+      } else if (markerSetMode === 'del') {
+        const nearest = markers.reduce<{ id: string; dist: number } | null>((best, m) => {
+          const d = Math.abs(m.time - time);
+          if (d < 50 && (!best || d < best.dist)) return { id: m.id, dist: d };
+          return best;
+        }, null);
+        if (nearest) {
+          removeMarker(nearest.id);
+          msg.success('Маркер удалён');
+        } else {
+          msg.info('Рядом нет маркера');
+        }
+        setMarkerSetMode('off');
+      }
+      // В обычном режиме клик по графику не добавляет маркер — используйте меню Траектория → Маркеры
     });
 
     const markerLines = markers.map((m) => ({
@@ -94,20 +122,23 @@ export default function TrajectoryChart() {
       lineStyle: { color: '#faad14', type: 'dashed' as const, width: 1 },
     }));
 
-    const axisPointer: any = cursorMode === 'cross'
-      ? { link: [{ xAxisIndex: 0 }], label: { show: true } }
-      : cursorMode === 'crossVal'
-        ? { link: [{ xAxisIndex: 0 }], label: { show: true, formatter: (p: any) => `${p.seriesName}: ${p.value}` } }
-        : cursorMode === 'vline'
-          ? { type: 'line', snap: true, label: { show: true } }
-          : undefined;
+    const axisPtrType = cursorMode === 'cross' ? 'cross'
+      : cursorMode === 'vline' ? 'line'
+      : cursorMode === 'arrow' ? 'shadow'
+      : cursorMode === 'crossVal' ? 'cross'
+      : 'line';
+
+    const showLabel = valuesMode !== 'hidden';
+    const axisPtrLabel = showLabel
+      ? { show: true, formatter: (p: any) => Array.isArray(p) ? p.map((s: any) => `${s.seriesName}: ${s.value}`).join(', ') : `${p.value}` }
+      : { show: false };
 
     chart.setOption({
       tooltip: {
         trigger: 'axis',
         confine: true,
         textStyle: { fontSize: 11 },
-        axisPointer: cursorMode === 'arrow' ? undefined : { type: 'cross' },
+        axisPointer: { type: axisPtrType, label: axisPtrLabel },
       },
       grid: { left: 50, right: 16, top: 40, bottom: 60 },
       xAxis: {
@@ -147,16 +178,16 @@ export default function TrajectoryChart() {
       chart.dispose();
       instanceRef.current = null;
     };
-  }, [selectedParams, traj, markers, scalesVisible, gridVisible, cursorMode]);
+  }, [graphFunctions, traj, markers, markerSetMode, scalesVisible, gridVisible, cursorMode, valuesMode]);
 
-  const handleResize = () => {
+  const handleResize = useCallback(() => {
     instanceRef.current?.resize();
-  };
+  }, []);
 
   useEffect(() => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [handleResize]);
 
   if (!traj) {
     return (
@@ -174,18 +205,39 @@ export default function TrajectoryChart() {
           mode="multiple"
           size="small"
           style={{ minWidth: 200 }}
-          placeholder="Выберите параметры"
-          value={selectedParams}
-          onChange={setSelectedParams}
+          placeholder="Параметры на графике"
+          value={graphFunctions.filter((f) => f.visible).map((f) => f.paramName)}
+          onChange={(vals) => {
+            allParams.forEach((p) => {
+              const existing = graphFunctions.find((f) => f.paramName === p);
+              if (vals.includes(p) && !existing) {
+                addFunction({
+                  id: `gf-${p}`,
+                  paramName: p,
+                  color: COLORS[graphFunctions.length % COLORS.length],
+                  thickness: 1.5,
+                  lineType: 'solid',
+                  scale: 'left',
+                  baseline: 0,
+                  visible: true,
+                });
+              }
+              if (!vals.includes(p) && existing) {
+                removeFunction(existing.id);
+              }
+            });
+          }}
           options={allParams.map((p) => ({ value: p, label: p }))}
         />
       }
       style={{ width: '100%' }}
     >
       <div ref={chartRef} style={{ width: '100%', height: 400 }} />
-      <Text type="secondary" style={{ fontSize: 11, display: 'block', marginTop: 4 }}>
-        Жёлтые пунктиры — маркеры событий. Зум: колесо мыши или слайдер снизу.
-      </Text>
+      {markerSetMode !== 'off' && (
+        <Text type="warning" style={{ fontSize: 12, display: 'block', marginTop: 4, color: '#faad14' }}>
+          Режим {markerSetMode === 'set' ? 'установки' : 'удаления'} маркеров. Esc — отмена.
+        </Text>
+      )}
     </Card>
   );
 }

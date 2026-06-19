@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Row, Col, Card, Tag, Typography, Button, Empty, Space, List, Badge } from 'antd';
 import { PlusOutlined, SettingOutlined, MonitorOutlined, WarningFilled, CheckCircleFilled, CloseCircleFilled } from '@ant-design/icons';
 import { mockTelemetryValues, mockAlarms, mockScreens } from '../../mock-data';
@@ -18,6 +19,7 @@ const statusIcon = (status: TelemetryValue['status']) => {
 const statusColor = (status: Alarm['status']) => status === 'critical' ? '#ff4d4f' : '#faad14';
 
 export default function ScreenPage() {
+  const navigate = useNavigate();
   const [editorOpen, setEditorOpen] = useState(false);
   const currentScreen = mockScreens[0];
 
@@ -33,7 +35,7 @@ export default function ScreenPage() {
             </Space>
             <Space>
               <Button icon={<SettingOutlined />} onClick={() => setEditorOpen(true)}>Настройки экрана</Button>
-              <Button icon={<PlusOutlined />} type="primary">Создать экран</Button>
+              <Button icon={<PlusOutlined />} type="primary" onClick={() => navigate('/screens')}>Создать экран</Button>
             </Space>
           </Space>
         </Col>

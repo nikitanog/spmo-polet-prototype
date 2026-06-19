@@ -1,6 +1,6 @@
 import { useState } from 'react';
-import { Modal, Input, Select, Button, Alert, Typography, Space } from 'antd';
-import { SaveOutlined } from '@ant-design/icons';
+import { Modal, Input, Select, Button, Alert, Typography, Space, message } from 'antd';
+import { SaveOutlined, DownloadOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 
@@ -23,6 +23,40 @@ export default function GraphSaveModal({ open, onClose }: GraphSaveModalProps) {
 
   const handleSave = () => {
     if (!fileName.trim()) return;
+    if (format === '.png') {
+      const canvas = document.createElement('canvas');
+      canvas.width = 800;
+      canvas.height = 400;
+      const ctx = canvas.getContext('2d');
+      if (ctx) {
+        ctx.fillStyle = '#fff';
+        ctx.fillRect(0, 0, 800, 400);
+        ctx.fillStyle = '#333';
+        ctx.font = '14px sans-serif';
+        ctx.fillText(`График траектории — ${fileName}`, 16, 24);
+        ctx.fillText(`Дата: ${new Date().toLocaleString('ru-RU')}`, 16, 48);
+        ctx.strokeStyle = '#1677ff';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < 200; i++) {
+          const x = 50 + (i / 200) * 700;
+          const y = 300 - 200 * Math.sin(i / 20) * 0.5 - 50;
+          i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+      canvas.toBlob((blob) => {
+        if (blob) {
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = `${fileName}.png`;
+          a.click();
+          URL.revokeObjectURL(url);
+        }
+      });
+    }
+    message.success(`График сохранён как ${fileName}${format}`);
     setSaved(true);
   };
 

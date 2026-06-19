@@ -1,6 +1,7 @@
 import { useState } from 'react';
-import { Modal, Select, Button, Progress, Alert, Typography, Divider } from 'antd';
-import { PlayCircleOutlined } from '@ant-design/icons';
+import { useNavigate } from 'react-router-dom';
+import { Modal, Select, Button, Progress, Alert, Typography, Divider, Space } from 'antd';
+import { PlayCircleOutlined, DesktopOutlined } from '@ant-design/icons';
 import { useAppStore } from '../stores/useAppStore';
 
 const { Text } = Typography;
@@ -24,6 +25,7 @@ const mockFileOptions = [
 ];
 
 export default function TrajCalcModal({ open, onClose }: TrajCalcModalProps) {
+  const navigate = useNavigate();
   const { setActiveTrajectory, trajectories } = useAppStore();
   const [selectedDb, setSelectedDb] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<string | null>(null);
@@ -111,7 +113,15 @@ export default function TrajCalcModal({ open, onClose }: TrajCalcModalProps) {
         )}
 
         {calcStatus === 'done' && (
-          <Divider />
+          <>
+            <Divider />
+            <Space style={{ width: '100%', justifyContent: 'center' }}>
+              <Button type="primary" icon={<DesktopOutlined />} onClick={() => { handleClose(); navigate('/'); }}>
+                Открыть в рабочем окне
+              </Button>
+              <Button onClick={handleClose}>Закрыть</Button>
+            </Space>
+          </>
         )}
       </div>
     </Modal>

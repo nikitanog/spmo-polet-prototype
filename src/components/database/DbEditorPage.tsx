@@ -204,7 +204,27 @@ export default function DbEditorPage() {
       </Row>
       <Row gutter={[12, 12]} style={{ marginTop: 12 }}>
         <Col span={5}>
-          <Tree treeData={treeData} defaultExpandAll style={{ background: 'transparent' }} />
+          <Tree
+            treeData={treeData}
+            defaultExpandAll
+            style={{ background: 'transparent' }}
+            onSelect={(keys) => {
+              if (keys.length === 0) return;
+              const key = keys[0] as string;
+              const topic = mockTopics.find(t => t.id === key);
+              if (topic) {
+                setSearchText('');
+                setTypeFilter(undefined);
+                setActiveTab('params');
+              } else {
+                const obj = mockTopics.flatMap(t => t.objects).find(o => o.id === key);
+                if (obj) {
+                  setSearchText(obj.name);
+                  setActiveTab('params');
+                }
+              }
+            }}
+          />
         </Col>
         <Col span={19}>
           <Tabs activeKey={activeTab} onChange={setActiveTab} items={tabItems} />

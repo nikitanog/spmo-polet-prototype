@@ -1,12 +1,20 @@
 import { useState } from 'react';
 import { Modal, Tabs, Table, Tag, Button, Typography, Select, Space, Alert } from 'antd';
-import ReactEChartsCore from 'echarts-for-react/lib/core';
+import Chart from '../components/common/Chart';
 import * as echarts from 'echarts/core';
-import { LineChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent, MarkAreaComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import { MarkLineComponent } from 'echarts/components';
 
-echarts.use([LineChart, GridComponent, TooltipComponent, MarkAreaComponent, CanvasRenderer]);
+echarts.use([MarkLineComponent]);
+
+function parseTimeToSeconds(t: string): number {
+  const parts = t.split(/[:.]/);
+  if (parts.length < 3) return 0;
+  const h = parseInt(parts[0]) || 0;
+  const m = parseInt(parts[1]) || 0;
+  const s = parseInt(parts[2]) || 0;
+  const ms = parseInt(parts[3]) || 0;
+  return h * 3600 + m * 60 + s + ms / 1000;
+}
 
 const { Text } = Typography;
 
@@ -57,9 +65,9 @@ function TimeFaultsTab() {
         style={{ marginTop: 8 }}
         onRow={(record) => ({ onClick: () => setSelected(record.key), style: { cursor: 'pointer', background: selected === record.key ? '#e6f4ff' : undefined } })}
       />
-      <div style={{ height: 180, marginTop: 12 }}>
-        <ReactEChartsCore
-          echarts={echarts}
+      <div style={{ marginTop: 12 }}>
+        <Chart
+          height={180}
           option={{
             tooltip: { trigger: 'axis' },
             grid: { left: 50, right: 16, top: 16, bottom: 24 },
@@ -67,16 +75,15 @@ function TimeFaultsTab() {
             yAxis: { type: 'value' },
             series: [{
               type: 'line', data, symbol: 'none', lineStyle: { width: 1, color: '#1677ff' },
-              markArea: {
-                data: mockTimeFaults.map(f => [
-                  { xAxis: Number(f.start.slice(3, 5)) * 60 + Number(f.start.slice(6, 8)) },
-                  { xAxis: Number(f.end.slice(3, 5)) * 60 + Number(f.end.slice(6, 8)), itemStyle: { color: 'rgba(255,0,0,0.15)' } },
-                ]),
+              markLine: {
+                silent: true,
+                symbol: 'none',
+                lineStyle: { color: '#ff4d4f', width: 1, type: 'dashed' },
+                data: mockTimeFaults.map(f => ({ xAxis: Math.min(parseTimeToSeconds(f.start), data.length - 1) })),
               },
             }],
             animation: false,
           }}
-          style={{ height: 180 }}
         />
       </div>
     </div>
@@ -103,9 +110,9 @@ function ParamFaultsTab() {
         <Select value={param} onChange={setParam} style={{ width: 180 }} options={['Параметр_001', 'Параметр_010', 'Параметр_020', 'Параметр_050'].map(p => ({ value: p, label: p }))} />
       </Space>
       <Table dataSource={mockParamFaults} columns={paramFaultsColumns} size="small" pagination={false} />
-      <div style={{ height: 180, marginTop: 12 }}>
-        <ReactEChartsCore
-          echarts={echarts}
+      <div style={{ marginTop: 12 }}>
+        <Chart
+          height={180}
           option={{
             tooltip: { trigger: 'axis' },
             grid: { left: 50, right: 16, top: 16, bottom: 24 },
@@ -117,7 +124,6 @@ function ParamFaultsTab() {
             ],
             animation: false,
           }}
-          style={{ height: 180 }}
         />
       </div>
       {!fixed ? (

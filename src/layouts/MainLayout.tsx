@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { Layout, Modal, message, Space, Button, Dropdown, Tooltip } from 'antd';
+import { Layout, Modal, message, Space, Button, Dropdown, Tooltip, Input, Select } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import {
   FolderOpenOutlined, SaveOutlined, CalculatorOutlined, DeleteOutlined,
@@ -85,6 +85,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [dbCompareOpen, setDbCompareOpen] = useState(false);
   const [dbUpdateOpen, setDbUpdateOpen] = useState(false);
   const [screenSaveOpen, setScreenSaveOpen] = useState(false);
+  const [screenCreateOpen, setScreenCreateOpen] = useState(false);
   const [screenSplitOpen, setScreenSplitOpen] = useState(false);
   const [addFuncOpen, setAddFuncOpen] = useState(false);
   const [graphLimitsOpen, setGraphLimitsOpen] = useState(false);
@@ -102,7 +103,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
   const [addValueOpen, setAddValueOpen] = useState(false);
 
   useEffect(() => {
-    setSelectObjectOpen(true);
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        const { markerSetMode, setMarkerSetMode } = useAppStore.getState();
+        if (markerSetMode !== 'off') {
+          setMarkerSetMode('off');
+          message.info('Режим маркеров отменён');
+        }
+      }
+    };
+    window.addEventListener('keydown', handler);
+    return () => window.removeEventListener('keydown', handler);
   }, []);
 
   const handleMenuClick = useCallback((key: string) => {
@@ -117,7 +128,11 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setCreateObjectOpen(true);
         break;
       case 'object-exit':
-        Modal.confirm({ title: 'Завершить работу с СПМО «Полёт»?', onOk: () => window.close() });
+        Modal.confirm({
+          title: 'Завершить работу с СПМО «Полёт»?',
+          content: 'Закройте вкладку браузера для выхода из приложения.',
+          onOk: () => message.info('Закройте вкладку браузера для завершения работы.'),
+        });
         break;
       case 'traj-calc':
         setTrajCalcOpen(true);
@@ -143,27 +158,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setFaultsOpen(true);
         break;
       case 'marker-set':
-        message.info('Кликните на графике для установки маркера');
+        useAppStore.getState().setMarkerSetMode('set');
+        message.info('Кликните на графике для установки маркера. Esc — отмена.');
         break;
       case 'marker-del':
-        message.info('Выберите маркер для удаления');
+        useAppStore.getState().setMarkerSetMode('del');
+        message.info('Кликните по маркеру на графике для удаления. Esc — отмена.');
         break;
       case 'marker-del-all':
-        Modal.confirm({ title: 'Удалить все маркеры?', onOk: () => message.success('Все маркеры удалены') });
+        Modal.confirm({ title: 'Удалить все маркеры?', onOk: () => {
+          useAppStore.getState().clearMarkers();
+          message.success('Все маркеры удалены');
+        }});
         break;
       case 'sample-save':
       case 'sample-add':
         setSampleOpen(true);
         break;
       case 'db-view':
-      case 'db-current':
         navigate('/db');
+        break;
+      case 'db-current':
+        navigate('/db?db=current');
         break;
       case 'db-editor':
         navigate('/db-editor');
         break;
       case 'db-calc':
-        navigate('/db');
+        navigate('/db?db=calc');
         break;
       case 'db-change':
         setOpenDbOpen(true);
@@ -172,7 +194,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setOpenDbOpen(true);
         break;
       case 'screen-create':
-        navigate('/screens');
+        setScreenCreateOpen(true);
         break;
       case 'screen-open':
         navigate('/screens');
@@ -192,12 +214,26 @@ export default function MainLayout({ children }: MainLayoutProps) {
       case 'screen-win-clear':
         Modal.confirm({ title: 'Очистить содержимое окна?', onOk: () => message.success('Окно очищено') });
         break;
-      case 'screen-win-rename':
-        Modal.info({ title: 'Переименовать окно', content: 'Новое имя: [поле ввода]' });
+      case 'screen-win-rename': {
+        let newName = '';
+        Modal.confirm({
+          title: 'Переименовать окно',
+          icon: null,
+          content: <Input placeholder="Введите новое имя окна" onChange={(e) => { newName = e.target.value; }} />,
+          onOk: () => message.success(newName.trim() ? `Окно переименовано в «${newName.trim()}»` : 'Имя не изменено'),
+        });
         break;
-      case 'screen-win-move':
-        Modal.info({ title: 'Переместить/Копировать', content: 'Выберите позицию назначения' });
+      }
+      case 'screen-win-move': {
+        let target = '';
+        Modal.confirm({
+          title: 'Переместить/Копировать',
+          icon: null,
+          content: <Select placeholder="Выберите позицию назначения" style={{ width: '100%' }} onChange={(v) => { target = v; }} options={[{ value: 'up', label: 'Выше' }, { value: 'down', label: 'Ниже' }, { value: 'left', label: 'Левее' }, { value: 'right', label: 'Правее' }]} />,
+          onOk: () => message.success(`Перемещение выполнено: ${target}`),
+        });
         break;
+      }
       case 'screen-split':
         setScreenSplitOpen(true);
         break;
@@ -335,10 +371,10 @@ export default function MainLayout({ children }: MainLayoutProps) {
         message.success('Снимок экрана сохранён: screenshot_2026-06-18.png');
         break;
       case 'help-f1':
-        Modal.info({ title: 'Справка', content: 'СПМО «Полёт» версия 5. Руководство оператора. Раздел: справка по программе.' });
+        navigate('/help');
         break;
       case 'help-about':
-        Modal.info({ title: 'О программе', content: 'СПМО «Полёт» версия 5. Прототип UI. Разработка: НИЦ «Полёт».' });
+        Modal.info({ title: 'О программе', content: 'СПМО «Полёт» версия 5. Прототип UI. Разработка: НИЦ «Полёт». Версия прототипа: v5-r1. Дата сборки: 2026-06-19.' });
         break;
       default:
         message.info(`Команда: ${key}`);
@@ -443,7 +479,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           width={220}
           style={{ background: isFlight ? '#16213e' : '#fafafa', borderRight: '1px solid #d9d9d9' }}
         >
-          <ObjectTree />
+          <ObjectTree onCreateTopic={() => setCreateTopicOpen(true)} onCreateObject={() => setCreateObjectOpen(true)} />
         </Sider>
         <Content style={{ padding: 0, background: bgColor, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <MainMenuBar onMenuClick={handleMenuClick} />
@@ -483,6 +519,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <TrajOpenModal open={trajOpenOpen} onClose={() => setTrajOpenOpen(false)} />
       <TrajSavePartModal open={trajSavePartOpen} onClose={() => setTrajSavePartOpen(false)} />
       <TrajDelPartModal open={trajDelPartOpen} onClose={() => setTrajDelPartOpen(false)} />
+      <ScreenCreateModal open={screenCreateOpen} onClose={() => setScreenCreateOpen(false)} onCreate={(name) => { message.success(`Экран «${name}» создан`); navigate('/screens'); }} />
       <ScreenSaveModal open={screenSaveOpen} onClose={() => setScreenSaveOpen(false)} />
       <ScreenSplitModal open={screenSplitOpen} onClose={() => setScreenSplitOpen(false)} />
       <ScreenWinAddModal open={screenWinAddOpen} onClose={() => setScreenWinAddOpen(false)} />

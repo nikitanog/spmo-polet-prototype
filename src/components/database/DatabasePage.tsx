@@ -1,5 +1,6 @@
 import { useState, useMemo } from 'react';
-import { Row, Col, Tree, Input, Select, Table, Tag, Button, Typography, Space, Badge } from 'antd';
+import { useSearchParams } from 'react-router-dom';
+import { Row, Col, Tree, Input, Select, Table, Tag, Button, Typography, Space, Badge, message } from 'antd';
 import { SearchOutlined, PlusOutlined, ImportOutlined, ExportOutlined, EditOutlined } from '@ant-design/icons';
 import { mockParams } from '../../mock-data';
 import { mockTopics } from '../../mock-data';
@@ -22,6 +23,10 @@ interface ParamRow {
 }
 
 export default function DatabasePage() {
+  const [searchParams] = useSearchParams();
+  const dbType = searchParams.get('db');
+  const dbTitle = dbType === 'current' ? 'Текущая БД СБИ' : dbType === 'calc' ? 'Расчётная БД СБИ' : 'База данных СБИ';
+
   const [searchText, setSearchText] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [subdivisionFilter, setSubdivisionFilter] = useState<string | undefined>();
@@ -82,7 +87,7 @@ export default function DatabasePage() {
     <div>
       <Row gutter={[12, 12]}>
         <Col span={24}>
-          <Text strong style={{ fontSize: 16 }}>База данных СБИ</Text>
+          <Text strong style={{ fontSize: 16 }}>{dbTitle}</Text>
           <Text type="secondary" style={{ marginLeft: 12 }}>{mockTopics.length} темы, {allParams.length} параметров</Text>
         </Col>
       </Row>
@@ -93,6 +98,22 @@ export default function DatabasePage() {
             treeData={treeData}
             defaultExpandAll
             style={{ background: 'transparent' }}
+            onSelect={(keys) => {
+              if (keys.length === 0) return;
+              const key = keys[0] as string;
+              const topic = mockTopics.find(t => t.id === key);
+              if (topic) {
+                const idx = mockTopics.indexOf(topic);
+                setSubdivisionFilter(`Подразделение ${idx + 1}`);
+                setSearchText('');
+              } else {
+                const obj = mockTopics.flatMap(t => t.objects).find(o => o.id === key);
+                if (obj) {
+                  setSearchText(obj.name);
+                  setSubdivisionFilter(undefined);
+                }
+              }
+            }}
           />
         </Col>
         <Col span={19}>
@@ -129,8 +150,8 @@ export default function DatabasePage() {
           <Space style={{ marginBottom: 8 }}>
             <Button icon={<EditOutlined />} onClick={() => handleRowDoubleClick(filtered[0] || allParams[0])}>Редактор</Button>
             <Button icon={<ImportOutlined />} onClick={() => setImportOpen(true)}>Импорт</Button>
-            <Button icon={<ExportOutlined />}>Экспорт</Button>
-            <Button icon={<PlusOutlined />} type="dashed">Создать параметр</Button>
+            <Button icon={<ExportOutlined />} onClick={() => message.info('Экспорт данных БД')}>Экспорт</Button>
+            <Button icon={<PlusOutlined />} type="dashed" onClick={() => { setSelectedParam(null); setPropsOpen(true); }}>Создать параметр</Button>
           </Space>
 
           <Table

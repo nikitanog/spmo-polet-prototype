@@ -1,13 +1,7 @@
 import { useState } from 'react';
 import { Modal, Tabs, Form, Select, Button, Progress, Alert, Typography, Space, Slider } from 'antd';
 import { SyncOutlined, SlidersOutlined } from '@ant-design/icons';
-import ReactEChartsCore from 'echarts-for-react/lib/core';
-import * as echarts from 'echarts/core';
-import { LineChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
-
-echarts.use([LineChart, GridComponent, TooltipComponent, CanvasRenderer]);
+import Chart from '../components/common/Chart';
 
 const { Text } = Typography;
 
@@ -74,9 +68,9 @@ function ManualSync() {
 
   return (
     <div>
-      <div style={{ height: 240, marginBottom: 12 }}>
-        <ReactEChartsCore
-          echarts={echarts}
+      <div style={{ marginBottom: 12 }}>
+        <Chart
+          height={240}
           option={{
             tooltip: { trigger: 'axis' },
             grid: { left: 50, right: 16, top: 20, bottom: 24 },
@@ -88,7 +82,6 @@ function ManualSync() {
             ],
             animation: false,
           }}
-          style={{ height: 240 }}
         />
       </div>
 

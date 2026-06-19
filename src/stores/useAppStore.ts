@@ -7,6 +7,8 @@ import {
   mockFaults,
 } from '../mock-data';
 
+type MarkerSetMode = 'off' | 'set' | 'del';
+
 interface AppState {
   mode: 'flight' | 'analysis';
   selectedTopicId: string | null;
@@ -16,6 +18,7 @@ interface AppState {
   faults: Fault[];
   themes: Theme[];
   trajectories: Trajectory[];
+  markerSetMode: MarkerSetMode;
 
   setMode: (mode: 'flight' | 'analysis') => void;
   selectTopic: (id: string) => void;
@@ -27,6 +30,8 @@ interface AppState {
   setMarkers: (markers: Marker[]) => void;
   addTopic: (name: string) => void;
   addObject: (topicId: string, name: string) => void;
+  addTrajectory: (traj: Trajectory) => void;
+  setMarkerSetMode: (mode: MarkerSetMode) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -38,6 +43,7 @@ export const useAppStore = create<AppState>((set) => ({
   faults: mockFaults,
   themes: mockTopics,
   trajectories: mockTrajectories,
+  markerSetMode: 'off',
 
   setMode: (mode) => set({ mode }),
   selectTopic: (id) => set({ selectedTopicId: id, selectedObjectId: null }),
@@ -58,4 +64,9 @@ export const useAppStore = create<AppState>((set) => ({
         : t
     ),
   })),
+  addTrajectory: (traj) => set((s) => ({
+    trajectories: [...s.trajectories, traj],
+    activeTrajectoryId: traj.id,
+  })),
+  setMarkerSetMode: (mode) => set({ markerSetMode: mode }),
 }));

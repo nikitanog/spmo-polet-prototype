@@ -1,15 +1,9 @@
 import { useState } from 'react';
 import { Row, Col, Card, Table, Tag, Button, Typography, Space, Tabs, Select, InputNumber } from 'antd';
 import { PlayCircleOutlined, PlusOutlined, SettingOutlined, BarChartOutlined } from '@ant-design/icons';
-import ReactEChartsCore from 'echarts-for-react/lib/core';
-import * as echarts from 'echarts/core';
-import { LineChart } from 'echarts/charts';
-import { GridComponent, TooltipComponent } from 'echarts/components';
-import { CanvasRenderer } from 'echarts/renderers';
+import Chart from '../common/Chart';
 import { mockTasks } from '../../mock-data';
 import CreateTaskModal from '../../modals/CreateTaskModal';
-
-echarts.use([LineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 const { Text } = Typography;
 
@@ -96,17 +90,16 @@ export default function ProcessingPage() {
                   key: 'fft',
                   label: 'Результат FFT',
                   children: (
-                    <ReactEChartsCore
-                      echarts={echarts}
+                    <Chart
+                      height={220}
                       option={{
-                        tooltip: { trigger: 'axis', formatter: ({ value }: any) => `Частота: ${value[0]} Гц<br/>Амплитуда: ${value[1].toFixed(2)}` },
+                        tooltip: { trigger: 'axis' },
                         grid: { left: 50, right: 16, top: 16, bottom: 24 },
                         xAxis: { type: 'value', name: 'Частота (Гц)', nameTextStyle: { fontSize: 11 } },
                         yAxis: { type: 'value', name: 'Амплитуда', nameTextStyle: { fontSize: 11 } },
                         series: [{ type: 'line', data: fftData.map((d) => [d.freq, d.amp]), symbol: 'none', lineStyle: { width: 1, color: '#722ed1' }, areaStyle: { color: 'rgba(114,46,209,0.1)' } }],
                         animation: false,
                       }}
-                      style={{ height: 220 }}
                     />
                   ),
                 },
@@ -174,8 +167,9 @@ export default function ProcessingPage() {
                   key: 'result',
                   label: 'Результат',
                   children: (
-                    <ReactEChartsCore
-                      echarts={echarts}
+                    <Chart
+                      key="filter-chart"
+                      height={220}
                       option={{
                         tooltip: { trigger: 'axis' },
                         grid: { left: 50, right: 16, top: 16, bottom: 24 },
@@ -187,7 +181,6 @@ export default function ProcessingPage() {
                         ],
                         animation: false,
                       }}
-                      style={{ height: 220 }}
                     />
                   ),
                 },
