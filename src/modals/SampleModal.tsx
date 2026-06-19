@@ -61,10 +61,14 @@ export default function SampleModal({ open, onClose }: SampleModalProps) {
           <Form.Item label="Описание">
             <Input.TextArea rows={3} placeholder="Описание выборки (опционально)" />
           </Form.Item>
-          <Text type="secondary" style={{ display: 'block', marginBottom: 12 }}>
-            Будут сохранены все установленные маркеры (текущий набор: {markers.length} маркеров)
-          </Text>
-          <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>Сохранить</Button>
+          <Form.Item style={{ marginBottom: 12 }}>
+            <Text type="secondary">
+              Будут сохранены все установленные маркеры (текущий набор: {markers.length} маркеров)
+            </Text>
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" icon={<SaveOutlined />} onClick={handleSave}>Сохранить</Button>
+          </Form.Item>
         </Form>
       ) : (
         <Alert

@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Row, Col, Tree, Input, Select, Table, Tag, Button, Typography, Space, Badge, message } from 'antd';
-import { SearchOutlined, PlusOutlined, ImportOutlined, ExportOutlined, EditOutlined } from '@ant-design/icons';
-import { mockParams } from '../../mock-data';
+import { SearchOutlined, PlusOutlined, ImportOutlined, ExportOutlined, EditOutlined, DatabaseOutlined } from '@ant-design/icons';
+import { mockParams, mockTopics } from '../../mock-data';
 import ParamPropertiesModal from '../../modals/ParamPropertiesModal';
 import ImportDbModal from '../../modals/ImportDbModal';
 import type { ColumnsType } from 'antd/es/table';
@@ -25,7 +25,11 @@ interface ParamRow {
 export default function DatabasePage() {
   const [searchParams] = useSearchParams();
   const dbType = searchParams.get('db');
-  const dbTitle = dbType === 'current' ? 'Текущая БД СБИ' : dbType === 'calc' ? 'Расчётная БД СБИ' : 'База данных СБИ';
+  const openedFile = searchParams.get('opened');
+  const dbTitle = dbType === 'current' ? 'Текущая БД СБИ'
+    : dbType === 'calc' ? 'Расчётная БД СБИ'
+    : openedFile ? `БД СБИ: ${openedFile}`
+    : 'База данных СБИ';
 
   const [searchText, setSearchText] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
@@ -36,6 +40,7 @@ export default function DatabasePage() {
   const [selectedParam, setSelectedParam] = useState<ParamRow | null>(null);
   const [propsOpen, setPropsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
+  const [expandedKeys, setExpandedKeys] = useState<React.Key[]>(['all', ...mockTopics.map(t => t.id)]);
 
   const subdivisions = useMemo(
     () => [...new Set(mockParams.map(p => p.subdivision))].sort(),
@@ -43,21 +48,31 @@ export default function DatabasePage() {
   );
 
   const treeData: DataNode[] = useMemo(() => [{
-    title: <Text strong>Все параметры</Text>,
+    title: <Text strong>{dbTitle}</Text>,
     key: 'all',
-    children: subdivisions.map(sub => ({
-      title: sub,
-      key: `sub-${sub}`,
+    children: mockTopics.map(topic => ({
+      title: <Text strong style={{ fontSize: 13 }}>{topic.name}</Text>,
+      key: topic.id,
       isLeaf: false,
-      children: [...new Set(
-        mockParams.filter(p => p.subdivision === sub).map(p => p.category)
-      )].map(cat => ({
-        title: cat,
-        key: `cat-${sub}-${cat}`,
-        isLeaf: true,
+      children: topic.objects.map(obj => ({
+        title: <Text>{obj.name}</Text>,
+        key: obj.id,
+        isLeaf: false,
+        children: subdivisions.map(sub => ({
+          title: sub,
+          key: `sub-${obj.id}-${sub}`,
+          isLeaf: false,
+          children: [...new Set(
+            mockParams.filter(p => p.subdivision === sub).map(p => p.category)
+          )].map(cat => ({
+            title: cat,
+            key: `cat-${obj.id}-${sub}-${cat}`,
+            isLeaf: true,
+          })),
+        })),
       })),
     })),
-  }], []);
+  }], [dbTitle]);
 
   const allParams: ParamRow[] = useMemo(
     () => mockParams.map((p) => ({ key: p.id, ...p })),
@@ -113,16 +128,31 @@ export default function DatabasePage() {
       setCategoryFilter(undefined);
       setSearchText('');
     } else if (key.startsWith('cat-')) {
-      const [, sub, ...catParts] = key.split('-');
-      const cat = catParts.join('-');
+      const parts = key.split('-');
+      const sub = parts[2];
+      const cat = parts.slice(3).join('-');
       setSubdivisionFilter(sub);
       setCategoryFilter(cat);
       setSearchText('');
+      message.info(`Параметры: ${sub} → ${cat}`);
     } else if (key.startsWith('sub-')) {
-      const sub = key.slice(4);
+      const sub = key.split('-').slice(2).join('-');
       setSubdivisionFilter(sub);
       setCategoryFilter(undefined);
       setSearchText('');
+    } else {
+      const isTopic = mockTopics.some(t => t.id === key);
+      const isObject = mockTopics.flatMap(t => t.objects).some(o => o.id === key);
+      if (isObject) {
+        setSubdivisionFilter(undefined);
+        setCategoryFilter(undefined);
+        setSearchText('');
+        const obj = mockTopics.flatMap(t => t.objects).find(o => o.id === key);
+        message.info(`Выбран объект: ${obj?.name} — ${mockParams.length} доступных параметров`);
+      } else if (isTopic) {
+        const topic = mockTopics.find(t => t.id === key);
+        message.info(`Тема: ${topic?.name} — ${topic?.objects.length} бортов`);
+      }
     }
   };
 
@@ -130,8 +160,14 @@ export default function DatabasePage() {
     <div>
       <Row gutter={[12, 12]}>
         <Col span={24}>
-          <Text strong style={{ fontSize: 16 }}>{dbTitle}</Text>
-          <Text type="secondary" style={{ marginLeft: 12 }}>{subdivisions.length} подразделений, {allParams.length} параметров</Text>
+          <Space>
+            <DatabaseOutlined style={{ fontSize: 20 }} />
+            <Text strong style={{ fontSize: 16 }}>{dbTitle}</Text>
+            <Tag color={dbType === 'current' ? 'blue' : dbType === 'calc' ? 'purple' : 'default'}>
+              {dbType === 'current' ? 'Истинные значения' : dbType === 'calc' ? 'Расчётные значения' : 'Полный набор'}
+            </Tag>
+            <Text type="secondary">{subdivisions.length} подразделений, {allParams.length} параметров</Text>
+          </Space>
         </Col>
       </Row>
 
@@ -139,12 +175,10 @@ export default function DatabasePage() {
         <Col span={5}>
           <Tree
             treeData={treeData}
-            defaultExpandAll
+            expandedKeys={expandedKeys}
+            onExpand={setExpandedKeys}
             style={{ background: 'transparent' }}
-            selectedKeys={[
-              categoryFilter && subdivisionFilter ? `cat-${subdivisionFilter}-${categoryFilter}` :
-              subdivisionFilter ? `sub-${subdivisionFilter}` : 'all'
-            ]}
+            selectedKeys={['all']}
             onSelect={handleTreeSelect}
           />
         </Col>

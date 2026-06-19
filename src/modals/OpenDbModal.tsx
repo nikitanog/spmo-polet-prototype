@@ -10,10 +10,10 @@ interface OpenDbModalProps {
 }
 
 const mockDbFiles = [
-  { value: 'db_v52', label: 'sbis_db_v5.2.csv', size: '2.4 МБ', date: '2026-06-15' },
-  { value: 'db_v53', label: 'sbis_db_v5.3.csv', size: '3.1 МБ', date: '2026-06-14' },
-  { value: 'db_v49', label: 'sbis_db_v4.9.dbf', size: '5.7 МБ', date: '2026-05-20' },
-  { value: 'db_calc', label: 'calc_params.db', size: '0.8 МБ', date: '2026-06-10' },
+  { value: 'db_v52', label: 'sbis_db_v5.2.csv', size: '2.4 МБ', date: '2026-06-15', type: 'current' },
+  { value: 'db_v53', label: 'sbis_db_v5.3.csv', size: '3.1 МБ', date: '2026-06-14', type: 'current' },
+  { value: 'db_v49', label: 'sbis_db_v4.9.dbf', size: '5.7 МБ', date: '2026-05-20', type: 'current' },
+  { value: 'db_calc', label: 'calc_params.db', size: '0.8 МБ', date: '2026-06-10', type: 'calc' },
 ];
 
 export default function OpenDbModal({ open, onClose }: OpenDbModalProps) {
@@ -28,7 +28,8 @@ export default function OpenDbModal({ open, onClose }: OpenDbModalProps) {
       setSelected(null);
       setOpened(false);
       onClose();
-      navigate('/db');
+      const file = mockDbFiles.find((f) => f.value === selected);
+      navigate(`/db?opened=${file?.label || selected}`);
     }, 800);
   };
 

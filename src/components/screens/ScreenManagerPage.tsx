@@ -51,7 +51,18 @@ export default function ScreenManagerPage() {
             </Space>
             <Space>
               <Button icon={<PlusOutlined />} type="primary" onClick={() => setCreateOpen(true)}>Создать</Button>
-              <Button icon={<FolderOpenOutlined />} onClick={() => message.info('Выберите .scr файл')}>Открыть</Button>
+              <Button icon={<FolderOpenOutlined />} onClick={() => {
+                const keys = Object.keys(localStorage).filter(k => k.startsWith('scr_'));
+                if (keys.length === 0) { message.info('Нет сохранённых экранов. Используйте "Сохранить как..."'); return; }
+                const names = keys.map(k => k.replace('scr_', ''));
+                const name = prompt(`Выберите экран (доступны: ${names.join(', ')})`);
+                if (!name) return;
+                const raw = localStorage.getItem(`scr_${name}`);
+                if (!raw) { message.error('Экран не найден'); return; }
+                const data = JSON.parse(raw);
+                useScreenStore.getState().addScreen(data.name);
+                message.success(`Экран «${name}» загружен`);
+              }}>Открыть</Button>
             </Space>
           </Space>
         </Col>

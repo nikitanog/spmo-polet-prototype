@@ -61,6 +61,7 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate();
   const { mode, setMode } = useAppStore();
+  const activeTrajectoryId = useAppStore((s) => s.activeTrajectoryId);
 
   const [selectObjectOpen, setSelectObjectOpen] = useState(false);
   const [trajCalcOpen, setTrajCalcOpen] = useState(false);
@@ -249,7 +250,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
         }});
         break;
       case 'screen-win-clear':
-        Modal.confirm({ title: 'Очистить содержимое окна?', onOk: () => message.success('Окно очищено') });
+        Modal.confirm({ title: 'Очистить содержимое окна?', onOk: () => {
+          const store = useScreenStore.getState();
+          const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
+          if (sel && sel.windows.length > 0) {
+            const last = sel.windows[sel.windows.length - 1];
+            store.updateWindowParams(sel.id, last.id, []);
+            message.success('Параметры окна очищены');
+          } else {
+            message.info('Нет окон для очистки');
+          }
+        }});
         break;
       case 'screen-win-rename': {
         let newName = '';
@@ -271,12 +282,27 @@ export default function MainLayout({ children }: MainLayoutProps) {
         break;
       }
       case 'screen-win-move': {
-        let target = '';
+        let dir = '';
         Modal.confirm({
-          title: 'Переместить/Копировать',
+          title: 'Переместить/Копировать рабочее окно',
           icon: null,
-          content: <Select placeholder="Выберите позицию назначения" style={{ width: '100%' }} onChange={(v) => { target = v; }} options={[{ value: 'up', label: 'Выше' }, { value: 'down', label: 'Ниже' }, { value: 'left', label: 'Левее' }, { value: 'right', label: 'Правее' }]} />,
-          onOk: () => message.success(`Перемещение выполнено: ${target}`),
+          content: <Select placeholder="Выберите направление" style={{ width: '100%' }} onChange={(v) => { dir = v; }} options={[{ value: 'left', label: 'Левее' }, { value: 'right', label: 'Правее' }, { value: 'up', label: 'Выше' }, { value: 'down', label: 'Ниже' }]} />,
+          onOk: () => {
+            const store = useScreenStore.getState();
+            const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
+            if (sel && sel.windows.length > 0) {
+              const lastIdx = sel.windows.length - 1;
+              const toIdx = dir === 'left' || dir === 'up' ? Math.max(0, lastIdx - 1) : lastIdx;
+              if (toIdx !== lastIdx) {
+                store.reorderWindows(sel.id, lastIdx, toIdx);
+                message.success(`Окно перемещено ${dir === 'left' || dir === 'up' ? 'влево/вверх' : 'вправо/вниз'}`);
+              } else {
+                message.info('Окно уже на краю');
+              }
+            } else {
+              message.info('Нет окон для перемещения');
+            }
+          },
         });
         break;
       }
@@ -531,7 +557,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           <ObjectTree onCreateTopic={() => setCreateTopicOpen(true)} onCreateObject={() => setCreateObjectOpen(true)} />
         </Sider>
         <Content style={{ padding: 0, background: bgColor, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
-          <MainMenuBar onMenuClick={handleMenuClick} />
+          <MainMenuBar onMenuClick={handleMenuClick} hasTrajectory={!!activeTrajectoryId} />
           <div style={toolbarStyle}>
             <Tooltip title="Открыть (Ctrl+O)"><Button size="small" icon={<FolderOpenOutlined />} onClick={() => setTrajOpenOpen(true)} /></Tooltip>
             <Tooltip title="Сохранить (Ctrl+S)"><Button size="small" icon={<SaveOutlined />} onClick={() => message.success('Сохранено')} /></Tooltip>

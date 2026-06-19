@@ -1,5 +1,6 @@
 import { useState } from 'react';
-import { Modal, Button, Alert, Typography, Space, Tag } from 'antd';
+import { Modal, Button, Alert, Typography, Space, Tag, message } from 'antd';
+import { useScreenStore } from '../stores/useScreenStore';
 
 const { Text } = Typography;
 
@@ -13,6 +14,13 @@ export default function ScreenSplitModal({ open, onClose }: ScreenSplitModalProp
   const [applied, setApplied] = useState(false);
 
   const handleApply = () => {
+    const store = useScreenStore.getState();
+    const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
+    if (sel) {
+      store.addWindow(sel.id, 'graph', ['V_приборная_км_ч']);
+      store.addWindow(sel.id, 'graph', ['V_истинная_км_ч']);
+      message.success(`Экран разделён ${direction === 'horizontal' ? 'горизонтально' : 'вертикально'} на 2 части`);
+    }
     setApplied(true);
   };
 

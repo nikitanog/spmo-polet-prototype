@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, Input, Select, Button, Alert, Typography, Space } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
+import { useScreenStore } from '../stores/useScreenStore';
 
 const { Text } = Typography;
 
@@ -22,6 +23,10 @@ export default function ScreenSaveModal({ open, screenName, onClose }: ScreenSav
 
   const handleSave = () => {
     if (!fileName.trim()) return;
+    const screen = useScreenStore.getState().screens.find(s => s.name === screenName);
+    if (screen) {
+      localStorage.setItem(`scr_${fileName}`, JSON.stringify(screen));
+    }
     setSaved(true);
   };
 
