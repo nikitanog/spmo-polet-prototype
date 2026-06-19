@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, Button, Typography, Space, Tag, message } from 'antd';
+import { Modal, Button, Typography, Space, message } from 'antd';
 import { BarChartOutlined, TableOutlined, CameraOutlined, EnvironmentOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;

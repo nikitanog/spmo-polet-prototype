@@ -520,7 +520,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
       <TrajSavePartModal open={trajSavePartOpen} onClose={() => setTrajSavePartOpen(false)} />
       <TrajDelPartModal open={trajDelPartOpen} onClose={() => setTrajDelPartOpen(false)} />
       <ScreenCreateModal open={screenCreateOpen} onClose={() => setScreenCreateOpen(false)} onCreate={(name) => { message.success(`Экран «${name}» создан`); navigate('/screens'); }} />
-      <ScreenSaveModal open={screenSaveOpen} onClose={() => setScreenSaveOpen(false)} />
+      <ScreenSaveModal open={screenSaveOpen} screenName="" onClose={() => setScreenSaveOpen(false)} />
       <ScreenSplitModal open={screenSplitOpen} onClose={() => setScreenSplitOpen(false)} />
       <ScreenWinAddModal open={screenWinAddOpen} onClose={() => setScreenWinAddOpen(false)} />
       <AddFuncModal open={addFuncOpen} onClose={() => setAddFuncOpen(false)} />

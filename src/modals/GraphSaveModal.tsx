@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Modal, Input, Select, Button, Alert, Typography, Space, message } from 'antd';
-import { SaveOutlined, DownloadOutlined } from '@ant-design/icons';
+import { SaveOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;
 

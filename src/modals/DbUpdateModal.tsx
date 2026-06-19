@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, List, Tag, Button, Alert, Typography, Space, Checkbox, Empty } from 'antd';
+import { Modal, List, Tag, Button, Alert, Typography, Space, Checkbox } from 'antd';
 import { ReloadOutlined } from '@ant-design/icons';
 
 const { Text } = Typography;

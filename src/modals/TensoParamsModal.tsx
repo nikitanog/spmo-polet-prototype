@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Modal, Form, Select, InputNumber, Button, Progress, Alert, Typography, Space, Tag, message } from 'antd';
-import { DesktopOutlined, PlusOutlined } from '@ant-design/icons';
+import { PlusOutlined } from '@ant-design/icons';
 import { useGraphStore } from '../stores/useGraphStore';
 
 const { Text } = Typography;

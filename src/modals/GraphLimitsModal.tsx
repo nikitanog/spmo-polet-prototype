@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Modal, List, InputNumber, Switch, Button, Typography, Space, Tag } from 'antd';
+import { Modal, List, InputNumber, Switch, Typography, Space, Tag } from 'antd';
 import { useGraphStore } from '../stores/useGraphStore';
 
 const { Text } = Typography;

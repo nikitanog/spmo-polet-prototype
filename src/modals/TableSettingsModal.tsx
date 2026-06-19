@@ -1,6 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Modal, Select, InputNumber, Button, Typography, Space, Tag } from 'antd';
-import { SettingOutlined } from '@ant-design/icons';
+import { Modal, Select, InputNumber, Typography, Space } from 'antd';
 import { mockParams } from '../mock-data';
 
 const { Text } = Typography;

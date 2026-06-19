@@ -7,7 +7,7 @@ import { CanvasRenderer } from 'echarts/renderers';
 echarts.use([LineChart, GridComponent, TooltipComponent, CanvasRenderer]);
 
 interface ChartProps {
-  option: echarts.EChartsOption;
+  option: echarts.EChartsCoreOption;
   style?: React.CSSProperties;
   height?: number;
 }

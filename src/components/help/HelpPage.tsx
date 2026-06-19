@@ -1,8 +1,8 @@
 import { useState, useMemo } from 'react';
-import { Row, Col, Input, Typography, Card, Space, Tag, Empty } from 'antd';
+import { Row, Col, Input, Typography, Card, Space, Tag } from 'antd';
 import { SearchOutlined, BookOutlined } from '@ant-design/icons';
 
-const { Text, Title, Paragraph } = Typography;
+const { Title, Paragraph } = Typography;
 
 interface HelpSection {
   key: string;
