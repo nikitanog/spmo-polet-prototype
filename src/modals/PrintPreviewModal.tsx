@@ -35,10 +35,10 @@ export default function PrintPreviewModal({ open, onClose }: PrintPreviewModalPr
             <thead>
               <tr style={{ background: '#f5f5f5' }}>
                 <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>Время</th>
-                <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>Параметр_001</th>
-                <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>Параметр_002</th>
-                <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>Параметр_010</th>
-                <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>Параметр_020</th>
+                <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>V_приборная_км_ч</th>
+                <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>V_истинная_км_ч</th>
+                <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>Крен_град</th>
+                <th style={{ border: '1px solid #d9d9d9', padding: '4px 8px', textAlign: 'right' }}>Тангаж_град</th>
               </tr>
             </thead>
             <tbody>

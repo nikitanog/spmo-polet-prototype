@@ -9,6 +9,8 @@ export interface GraphFunction {
   scale: 'left' | 'right';
   baseline: number;
   visible: boolean;
+  yMin?: number;
+  yMax?: number;
 }
 
 interface GraphState {
@@ -28,8 +30,8 @@ const colors = ['#1677ff', '#ff4d4f', '#52c41a', '#faad14', '#722ed1', '#13c2c2'
 
 export const useGraphStore = create<GraphState>((set) => ({
   functions: [
-    { id: 'gf1', paramName: 'Параметр_001', color: colors[0], thickness: 1.5, lineType: 'solid', scale: 'left', baseline: 0, visible: true },
-    { id: 'gf2', paramName: 'Параметр_002', color: colors[1], thickness: 1.5, lineType: 'solid', scale: 'left', baseline: 0, visible: true },
+    { id: 'gf1', paramName: 'V_приборная_км_ч', color: colors[0], thickness: 1.5, lineType: 'solid', scale: 'left', baseline: 0, visible: true },
+    { id: 'gf2', paramName: 'Крен_град', color: colors[1], thickness: 1.5, lineType: 'solid', scale: 'left', baseline: 0, visible: true },
   ],
   xAxisParam: null,
   autoLimits: true,

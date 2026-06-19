@@ -50,6 +50,7 @@ import AddValueModal from '../modals/AddValueModal';
 import { CameraOutlined } from '@ant-design/icons';
 import { useAppStore } from '../stores/useAppStore';
 import { useViewStore } from '../stores/useViewStore';
+import { useScreenStore } from '../stores/useScreenStore';
 
 const { Header, Sider, Content } = Layout;
 
@@ -130,8 +131,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
       case 'object-exit':
         Modal.confirm({
           title: 'Завершить работу с СПМО «Полёт»?',
-          content: 'Закройте вкладку браузера для выхода из приложения.',
-          onOk: () => message.info('Закройте вкладку браузера для завершения работы.'),
+          icon: null,
+          content: (
+            <div>
+              <p>Вы действительно хотите выйти из программы?</p>
+              <p style={{ fontSize: 11, color: '#888' }}>
+                Все несохранённые данные будут потеряны.
+              </p>
+            </div>
+          ),
+          okText: 'Завершить',
+          cancelText: 'Отмена',
+          onOk: () => {
+            useAppStore.getState().exitApp();
+            Modal.info({
+              title: 'Работа завершена',
+              icon: null,
+              content: (
+                <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                  <p>Сеанс работы СПМО «Полёт» завершён.</p>
+                  <p style={{ fontSize: 11, color: '#888' }}>
+                    Для выхода из приложения закройте вкладку браузера.
+                  </p>
+                </div>
+              ),
+              okText: 'Закрыть вкладку',
+              onOk: () => window.close(),
+            });
+          },
         });
         break;
       case 'traj-calc':
@@ -209,7 +236,17 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setScreenWinAddOpen(true);
         break;
       case 'screen-win-del':
-        Modal.confirm({ title: 'Удалить рабочее окно?', onOk: () => message.success('Окно удалено') });
+        Modal.confirm({ title: 'Удалить последнее рабочее окно?', onOk: () => {
+          const store = useScreenStore.getState();
+          const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
+          if (sel && sel.windows.length > 0) {
+            const last = sel.windows[sel.windows.length - 1];
+            store.removeWindow(sel.id, last.id);
+            message.success('Окно удалено');
+          } else {
+            message.info('Нет окон для удаления');
+          }
+        }});
         break;
       case 'screen-win-clear':
         Modal.confirm({ title: 'Очистить содержимое окна?', onOk: () => message.success('Окно очищено') });
@@ -217,10 +254,19 @@ export default function MainLayout({ children }: MainLayoutProps) {
       case 'screen-win-rename': {
         let newName = '';
         Modal.confirm({
-          title: 'Переименовать окно',
+          title: 'Переименовать экран',
           icon: null,
-          content: <Input placeholder="Введите новое имя окна" onChange={(e) => { newName = e.target.value; }} />,
-          onOk: () => message.success(newName.trim() ? `Окно переименовано в «${newName.trim()}»` : 'Имя не изменено'),
+          content: <Input placeholder="Введите новое имя экрана" onChange={(e) => { newName = e.target.value; }} />,
+          onOk: () => {
+            const store = useScreenStore.getState();
+            const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
+            if (sel && newName.trim()) {
+              store.renameScreen(sel.id, newName.trim());
+              message.success(`Экран переименован в «${newName.trim()}»`);
+            } else {
+              message.info('Имя не изменено');
+            }
+          },
         });
         break;
       }
@@ -389,6 +435,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
       } else if (e.ctrlKey && e.key === 's') {
         e.preventDefault();
         message.success('Сохранено (Ctrl+S)');
+      } else if (e.key === 'F1') {
+        e.preventDefault();
+        navigate('/help');
       } else if (e.key === 'F5') {
         e.preventDefault();
         setTrajCalcOpen(true);
@@ -401,7 +450,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, []);
+  }, [navigate]);
 
   const isFlight = mode === 'flight';
   const bgColor = isFlight ? '#1a1a2e' : '#f5f5f5';

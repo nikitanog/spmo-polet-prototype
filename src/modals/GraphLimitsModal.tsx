@@ -17,7 +17,11 @@ export default function GraphLimitsModal({ open, onClose }: GraphLimitsModalProp
 
   const handleApply = () => {
     localFuncs.forEach((l) => {
-      updateFunction(l.id, { baseline: l.autoMin ? 0 : l.min });
+      updateFunction(l.id, {
+        baseline: l.autoMin ? 0 : l.min,
+        yMin: l.autoMin ? undefined : l.min,
+        yMax: l.autoMax ? undefined : l.max,
+      });
     });
     onClose();
   };

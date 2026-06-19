@@ -18,9 +18,9 @@ const formats = [
 
 const previewColumns = [
   { title: 'Время', dataIndex: 't', key: 't' },
-  { title: 'Параметр_001', dataIndex: 'p1', key: 'p1' },
-  { title: 'Параметр_002', dataIndex: 'p2', key: 'p2' },
-  { title: 'Параметр_003', dataIndex: 'p3', key: 'p3' },
+  { title: 'V_приборная_км_ч', dataIndex: 'p1', key: 'p1' },
+  { title: 'V_истинная_км_ч', dataIndex: 'p2', key: 'p2' },
+  { title: 'H_барометрическая_м', dataIndex: 'p3', key: 'p3' },
 ];
 
 const previewData = Array.from({ length: 10 }, (_, i) => ({
@@ -113,7 +113,7 @@ export default function ImportWizardModal({ open, onClose }: ImportWizardModalPr
                 <Select defaultValue="col_1" options={['col_1 (Время)', 'col_2', 'col_3', 'col_4'].map(c => ({ value: c, label: c }))} />
               </Form.Item>
               <Form.Item label="Параметр → колонка">
-                <Select mode="multiple" defaultValue={['col_2']} options={['col_2 (Параметр_001)', 'col_3 (Параметр_002)', 'col_4 (Параметр_003)'].map(c => ({ value: c, label: c }))} />
+                <Select mode="multiple" defaultValue={['col_2']} options={['col_2 (V_приборная_км_ч)', 'col_3 (V_истинная_км_ч)', 'col_4 (H_барометрическая_м)'].map(c => ({ value: c, label: c }))} />
               </Form.Item>
             </Form>
           </div>

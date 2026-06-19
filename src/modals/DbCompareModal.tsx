@@ -19,11 +19,11 @@ interface DiffRow {
 }
 
 const mockDiffData: DiffRow[] = [
-  { key: 'd1', param: 'Параметр_001', field: 'Мин', leftValue: '-100', rightValue: '-120', difference: 'modified' },
-  { key: 'd2', param: 'Параметр_001', field: 'Макс', leftValue: '100', rightValue: '110', difference: 'modified' },
-  { key: 'd3', param: 'Параметр_050', field: 'Ед.изм.', leftValue: 'м', rightValue: 'см', difference: 'modified' },
-  { key: 'd4', param: 'Параметр_101', field: '—', leftValue: '—', rightValue: 'новый', difference: 'added' },
-  { key: 'd5', param: 'Параметр_099', field: '—', leftValue: 'существующий', rightValue: '—', difference: 'removed' },
+  { key: 'd1', param: 'V_приборная_км_ч', field: 'Мин', leftValue: '-100', rightValue: '-120', difference: 'modified' },
+  { key: 'd2', param: 'V_приборная_км_ч', field: 'Макс', leftValue: '100', rightValue: '110', difference: 'modified' },
+  { key: 'd3', param: 'Темп_1_двиг_C', field: 'Ед.изм.', leftValue: 'м', rightValue: 'см', difference: 'modified' },
+  { key: 'd4', param: 'Напряжение_АКБ_В', field: '—', leftValue: '—', rightValue: 'новый', difference: 'added' },
+  { key: 'd5', param: 'Давление_масла_1_кгс_см2', field: '—', leftValue: 'существующий', rightValue: '—', difference: 'removed' },
 ];
 
 const mockDbOptions = [

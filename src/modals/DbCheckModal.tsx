@@ -19,7 +19,7 @@ interface CheckResult {
 const mockResults: CheckResult[] = [
   { key: 'c1', check: 'Целостность структуры БД', status: 'pass', detail: 'Все таблицы и индексы в порядке' },
   { key: 'c2', check: 'Уникальность идентификаторов', status: 'pass', detail: 'Дубликатов не найдено (120/120 уникальны)' },
-  { key: 'c3', check: 'Границы диапазонов', status: 'warn', detail: 'Параметр_012: мин > макс' },
+  { key: 'c3', check: 'Границы диапазонов', status: 'warn', detail: 'n_z_g: мин > макс' },
   { key: 'c4', check: 'Ссылочная целостность', status: 'pass', detail: 'Все внешние ключи валидны' },
   { key: 'c5', check: 'Типы параметров', status: 'fail', detail: '3 параметра без указанного типа' },
 ];

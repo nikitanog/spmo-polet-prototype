@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Modal, Input, Button, Alert, Typography, Space } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
+import { useTaskStore } from '../stores/useTaskStore';
 
 const { Text } = Typography;
 
@@ -12,9 +13,12 @@ interface TaskSaveModalProps {
 export default function TaskSaveModal({ open, onClose }: TaskSaveModalProps) {
   const [fileName, setFileName] = useState('tasks');
   const [saved, setSaved] = useState(false);
+  const tasks = useTaskStore((s) => s.tasks);
 
   const handleSave = () => {
     if (!fileName.trim()) return;
+    const data = JSON.stringify(tasks, null, 2);
+    localStorage.setItem(`tsk_${fileName}`, data);
     setSaved(true);
   };
 
@@ -44,7 +48,7 @@ export default function TaskSaveModal({ open, onClose }: TaskSaveModalProps) {
             />
           </div>
           <Text type="secondary">
-            Будут сохранены все задачи текущего сеанса.
+            Будут сохранены все задачи текущего сеанса ({tasks.length} шт.).
           </Text>
           <Space style={{ justifyContent: 'flex-end' }}>
             <Button onClick={handleClose}>Отмена</Button>
@@ -58,7 +62,7 @@ export default function TaskSaveModal({ open, onClose }: TaskSaveModalProps) {
           type="success"
           showIcon
           message="Задание сохранено"
-          description={`Файл ${fileName}.tsk сохранён.`}
+          description={`Файл ${fileName}.tsk сохранён (${tasks.length} задач).`}
           action={<Button size="small" onClick={handleClose}>Закрыть</Button>}
         />
       )}

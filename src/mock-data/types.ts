@@ -54,3 +54,16 @@ export interface TelemetryValue {
   unit: string;
   status: 'ok' | 'warning' | 'critical';
 }
+
+export interface ScreenWindow {
+  id: string;
+  type: 'graph' | 'table' | 'video' | 'map';
+  params: string[];
+}
+
+export interface Screen {
+  id: string;
+  name: string;
+  windows: ScreenWindow[];
+  created: string;
+}

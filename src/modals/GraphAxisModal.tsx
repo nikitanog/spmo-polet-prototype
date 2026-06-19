@@ -29,9 +29,9 @@ export default function GraphAxisModal({ open, onClose }: GraphAxisModalProps) {
 
   const axisOptions = [
     { value: '', label: 'Время (по умолчанию)' },
-    { value: 'Параметр_001', label: 'Параметр_001' },
-    { value: 'Параметр_002', label: 'Параметр_002' },
-    { value: 'Параметр_010', label: 'Параметр_010' },
+    { value: 'V_приборная_км_ч', label: 'V_приборная_км_ч' },
+    { value: 'V_истинная_км_ч', label: 'V_истинная_км_ч' },
+    { value: 'Крен_град', label: 'Крен_град' },
   ];
 
   return (

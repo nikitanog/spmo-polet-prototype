@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { Modal, Select, InputNumber, Typography, Space } from 'antd';
 import { mockParams } from '../mock-data';
+import { useTableStore } from '../stores/useTableStore';
 
 const { Text } = Typography;
 
@@ -10,11 +11,18 @@ interface TableSettingsModalProps {
 }
 
 export default function TableSettingsModal({ open, onClose }: TableSettingsModalProps) {
-  const [selectedCols, setSelectedCols] = useState<string[]>(
-    mockParams.slice(0, 5).map((p) => p.id)
-  );
-  const [stepSize, setStepSize] = useState(10);
-  const [numberFormat, setNumberFormat] = useState('0.00');
+  const store = useTableStore();
+  const [selectedCols, setSelectedCols] = useState<string[]>(store.selectedParamIds);
+  const [stepSize, setStepSize] = useState(store.stepSize);
+  const [numberFormat, setNumberFormat] = useState(store.numberFormat);
+
+  useEffect(() => {
+    if (open) {
+      setSelectedCols(store.selectedParamIds);
+      setStepSize(store.stepSize);
+      setNumberFormat(store.numberFormat);
+    }
+  }, [open]);
 
   const paramOptions = useMemo(
     () => mockParams.map((p) => ({ value: p.id, label: `${p.name} (${p.type})` })),
@@ -30,6 +38,9 @@ export default function TableSettingsModal({ open, onClose }: TableSettingsModal
   ];
 
   const handleApply = () => {
+    useTableStore.getState().setSelectedParamIds(selectedCols);
+    useTableStore.getState().setStepSize(stepSize);
+    useTableStore.getState().setNumberFormat(numberFormat);
     onClose();
   };
 

@@ -1,4 +1,5 @@
-import { Modal, Form, Select, Input } from 'antd';
+import { Modal, Form, Select, Input, message } from 'antd';
+import { useTaskStore } from '../stores/useTaskStore';
 
 interface CreateTaskModalProps {
   open: boolean;
@@ -32,16 +33,30 @@ const algorithmGroups = [
   ]},
 ];
 
-const paramOptions = ['Параметр_001', 'Параметр_002', 'Параметр_010', 'Параметр_020', 'Параметр_030', 'Параметр_050']
+const paramOptions = ['V_приборная_км_ч', 'V_истинная_км_ч', 'Крен_град', 'Тангаж_град', 'Расход_топлива_кг_ч', 'Темп_1_двиг_C']
   .map((p) => ({ value: p, label: p }));
 
 export default function CreateTaskModal({ open, onClose }: CreateTaskModalProps) {
   const [form] = Form.useForm();
+  const addTask = useTaskStore((s) => s.addTask);
 
   const handleOk = () => {
-    form.resetFields();
-    onClose();
+    const values = form.getFieldsValue();
+    form.validateFields().then(() => {
+      addTask({
+        name: values.name,
+        algorithm: algorithmGroups
+          .flatMap((g) => g.options)
+          .find((o) => o.value === values.algorithm)?.label || values.algorithm,
+        status: 'ready',
+      });
+      message.success(`Задача «${values.name}» создана`);
+      form.resetFields();
+      onClose();
+    }).catch(() => {});
   };
+
+  const algorithm = Form.useWatch('algorithm', form);
 
   return (
     <Modal
@@ -55,7 +70,7 @@ export default function CreateTaskModal({ open, onClose }: CreateTaskModalProps)
     >
       <Form form={form} layout="vertical" style={{ marginTop: 8 }}>
         <Form.Item label="Название задачи" name="name" rules={[{ required: true, message: 'Введите название' }]}>
-          <Input placeholder="Например: Фильтрация шумов Параметр_001" />
+          <Input placeholder="Например: Фильтрация шумов V_приборная_км_ч" />
         </Form.Item>
         <Form.Item label="Алгоритм" name="algorithm" rules={[{ required: true, message: 'Выберите алгоритм' }]}>
           <Select
@@ -67,7 +82,7 @@ export default function CreateTaskModal({ open, onClose }: CreateTaskModalProps)
         <Form.Item label="Входные параметры" name="params" rules={[{ required: true, message: 'Выберите параметры' }]}>
           <Select mode="multiple" placeholder="Выберите параметры" options={paramOptions} />
         </Form.Item>
-        {form.getFieldValue('algorithm')?.startsWith('calc_') && (
+        {algorithm?.startsWith('calc_') && (
           <Form.Item label="Формула/выражение" name="formula">
             <Input placeholder="Например: A + B * 2" />
           </Form.Item>

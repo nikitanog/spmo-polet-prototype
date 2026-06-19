@@ -20,7 +20,7 @@ function TypeForm({ type }: { type: string }) {
     calc: (
       <>
         <Form.Item label="Формула"><Input placeholder="Напр.: A + B * 2" /></Form.Item>
-        <Form.Item label="Входные параметры"><Select mode="multiple" placeholder="Выберите" options={['Параметр_001', 'Параметр_002'].map(p => ({ value: p, label: p }))} /></Form.Item>
+        <Form.Item label="Входные параметры"><Select mode="multiple" placeholder="Выберите" options={['V_приборная_км_ч', 'V_истинная_км_ч'].map(p => ({ value: p, label: p }))} /></Form.Item>
         <Form.Item label="Единицы измерения"><Input placeholder="м, с, кг..." /></Form.Item>
       </>
     ),

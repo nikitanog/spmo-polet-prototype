@@ -42,10 +42,10 @@ export default function CalcParamsModal({ open, onClose }: CalcParamsModalProps)
               <Input placeholder="Например: P_расч_001" />
             </Form.Item>
             <Form.Item label="Формула">
-              <Input.TextArea rows={3} value={formula} onChange={e => setFormula(e.target.value)} placeholder="A + B * 2, sin(Параметр_001), int(Параметр_002)" />
+              <Input.TextArea rows={3} value={formula} onChange={e => setFormula(e.target.value)} placeholder="A + B * 2, sin(V_приборная_км_ч), int(V_истинная_км_ч)" />
             </Form.Item>
             <Form.Item label="Входные параметры">
-              <Select mode="multiple" placeholder="Выберите параметры" options={['Параметр_001', 'Параметр_002', 'Параметр_010', 'Параметр_020', 'Параметр_030', 'Параметр_050'].map(p => ({ value: p, label: p }))} />
+              <Select mode="multiple" placeholder="Выберите параметры" options={['V_приборная_км_ч', 'V_истинная_км_ч', 'Крен_град', 'Тангаж_град', 'Расход_топлива_кг_ч', 'Темп_1_двиг_C'].map(p => ({ value: p, label: p }))} />
             </Form.Item>
           </Form>
           <div style={{ marginBottom: 12 }}>

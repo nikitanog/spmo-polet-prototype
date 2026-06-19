@@ -19,6 +19,7 @@ interface AppState {
   themes: Theme[];
   trajectories: Trajectory[];
   markerSetMode: MarkerSetMode;
+  exited: boolean;
 
   setMode: (mode: 'flight' | 'analysis') => void;
   selectTopic: (id: string) => void;
@@ -32,6 +33,8 @@ interface AppState {
   addObject: (topicId: string, name: string) => void;
   addTrajectory: (traj: Trajectory) => void;
   setMarkerSetMode: (mode: MarkerSetMode) => void;
+  exitApp: () => void;
+  resetExit: () => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -44,6 +47,7 @@ export const useAppStore = create<AppState>((set) => ({
   themes: mockTopics,
   trajectories: mockTrajectories,
   markerSetMode: 'off',
+  exited: false,
 
   setMode: (mode) => set({ mode }),
   selectTopic: (id) => set({ selectedTopicId: id, selectedObjectId: null }),
@@ -69,4 +73,12 @@ export const useAppStore = create<AppState>((set) => ({
     activeTrajectoryId: traj.id,
   })),
   setMarkerSetMode: (mode) => set({ markerSetMode: mode }),
+  exitApp: () => set({
+    exited: true,
+    selectedTopicId: null,
+    selectedObjectId: null,
+    activeTrajectoryId: null,
+    markerSetMode: 'off',
+  }),
+  resetExit: () => set({ exited: false }),
 }));

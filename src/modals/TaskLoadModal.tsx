@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Modal, Select, Button, Alert, Typography, Space } from 'antd';
+import { useTaskStore } from '../stores/useTaskStore';
 
 const { Text } = Typography;
 
@@ -15,12 +16,32 @@ const mockTaskFiles = [
   { value: 'task4', label: 'tenso_params.tsk', size: '0.8 КБ', date: '2026-05-28' },
 ];
 
+const fileTasks: Record<string, { name: string; algorithm: string }[]> = {
+  task1: [
+    { name: 'ФНЧ V_приборная_км_ч', algorithm: 'Фильтр Баттерворта ФНЧ' },
+    { name: 'ФНЧ Крен_град', algorithm: 'Фильтр Баттерворта ФНЧ' },
+  ],
+  task2: [
+    { name: 'Спектр вибрации двигателя', algorithm: 'БПФ (FFT)' },
+  ],
+  task3: [
+    { name: 'Калибровка тензодатчиков', algorithm: 'Tenso v2.1' },
+    { name: 'Коррекция смещения', algorithm: 'Медианный фильтр' },
+  ],
+  task4: [
+    { name: 'Расчёт тензопараметров крыла', algorithm: 'Tenso v2.1' },
+  ],
+};
+
 export default function TaskLoadModal({ open, onClose }: TaskLoadModalProps) {
   const [selected, setSelected] = useState<string | null>(null);
   const [loaded, setLoaded] = useState(false);
+  const addTask = useTaskStore((s) => s.addTask);
 
   const handleLoad = () => {
     if (!selected) return;
+    const tasks = fileTasks[selected] || [];
+    tasks.forEach((t) => addTask({ ...t, status: 'ready' }));
     setLoaded(true);
   };
 
@@ -77,7 +98,7 @@ export default function TaskLoadModal({ open, onClose }: TaskLoadModalProps) {
           type="success"
           showIcon
           message="Задание загружено"
-          description={`Файл ${selectedFile?.label} загружен. Задачи доступны в разделе «Вторичная обработка».`}
+          description={`Файл ${selectedFile?.label} загружен. ${fileTasks[selected!]?.length || 0} задач добавлено в очередь.`}
           action={<Button size="small" onClick={handleClose}>Закрыть</Button>}
         />
       )}

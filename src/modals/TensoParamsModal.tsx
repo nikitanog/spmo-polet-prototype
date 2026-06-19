@@ -67,7 +67,7 @@ export default function TensoParamsModal({ open, onClose }: TensoParamsModalProp
             <InputNumber min={1} max={24} defaultValue={10} />
           </Form.Item>
           <Form.Item label="Входные параметры">
-            <Select mode="multiple" options={['Параметр_001', 'Параметр_002', 'Параметр_010', 'Параметр_020'].map(p => ({ value: p, label: p }))} />
+            <Select mode="multiple" options={['V_приборная_км_ч', 'V_истинная_км_ч', 'Крен_град', 'Тангаж_град'].map(p => ({ value: p, label: p }))} />
           </Form.Item>
           <Button type="primary" onClick={startCalc}>Рассчитать</Button>
         </Form>

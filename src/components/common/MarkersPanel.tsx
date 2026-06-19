@@ -1,15 +1,22 @@
 import { useState } from 'react';
-import { Card, List, Button, InputNumber, Input, Modal, Tag, Empty, Typography } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Card, List, Button, InputNumber, Input, Modal, Tag, Empty, Typography, Tooltip } from 'antd';
+import { PlusOutlined, DeleteOutlined, EditOutlined } from '@ant-design/icons';
 import { useAppStore } from '../../stores/useAppStore';
 
 const { Text } = Typography;
+
+interface EditState {
+  id: string;
+  time: number;
+  comment: string;
+}
 
 export default function MarkersPanel() {
   const { markers, addMarker, removeMarker } = useAppStore();
   const [showAdd, setShowAdd] = useState(false);
   const [newTime, setNewTime] = useState<number>(0);
   const [newComment, setNewComment] = useState('');
+  const [edit, setEdit] = useState<EditState | null>(null);
 
   const handleAdd = () => {
     if (!newComment.trim()) return;
@@ -18,6 +25,15 @@ export default function MarkersPanel() {
     setNewComment('');
     setShowAdd(false);
   };
+
+  const handleEditSave = () => {
+    if (!edit) return;
+    removeMarker(edit.id);
+    addMarker({ id: edit.id, time: edit.time, comment: edit.comment.trim() || `Маркер @${edit.time}` });
+    setEdit(null);
+  };
+
+  const sorted = [...markers].sort((a, b) => a.time - b.time);
 
   return (
     <Card
@@ -35,10 +51,17 @@ export default function MarkersPanel() {
       ) : (
         <List
           size="small"
-          dataSource={[...markers].sort((a, b) => a.time - b.time)}
+          dataSource={sorted}
           renderItem={(item) => (
             <List.Item
               actions={[
+                <Tooltip key="edit" title="Редактировать">
+                  <Button
+                    size="small"
+                    icon={<EditOutlined />}
+                    onClick={() => setEdit({ id: item.id, time: item.time, comment: item.comment })}
+                  />
+                </Tooltip>,
                 <Button
                   key="del"
                   size="small"
@@ -82,6 +105,36 @@ export default function MarkersPanel() {
               value={newComment}
               onChange={(e) => setNewComment(e.target.value)}
               placeholder="Например: Взлёт, Набор высоты"
+            />
+          </div>
+        </div>
+      </Modal>
+
+      <Modal
+        title="Редактировать маркер"
+        open={!!edit}
+        onOk={handleEditSave}
+        onCancel={() => setEdit(null)}
+        okText="Сохранить"
+        cancelText="Отмена"
+      >
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div>
+            <Text strong style={{ display: 'block', marginBottom: 4 }}>Время (отсчёт)</Text>
+            <InputNumber
+              style={{ width: '100%' }}
+              min={0}
+              max={2999}
+              value={edit?.time}
+              onChange={(v) => setEdit(e => e ? { ...e, time: v ?? 0 } : null)}
+            />
+          </div>
+          <div>
+            <Text strong style={{ display: 'block', marginBottom: 4 }}>Комментарий</Text>
+            <Input
+              value={edit?.comment}
+              onChange={(e) => setEdit(prev => prev ? { ...prev, comment: e.target.value } : null)}
+              placeholder="Комментарий маркера"
             />
           </div>
         </div>

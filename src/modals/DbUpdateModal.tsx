@@ -17,10 +17,10 @@ interface UpdateItem {
 }
 
 const mockUpdates: UpdateItem[] = [
-  { id: 'u1', param: 'Параметр_001', type: 'calibration', description: 'Обновление градуировки (коэфф: 1.02 → 1.05)' },
-  { id: 'u2', param: 'Параметр_050', type: 'range', description: 'Изменение диапазона: мин -100 → -120, макс 100 → 110' },
-  { id: 'u3', param: 'Параметр_101', type: 'add', description: 'Добавление нового параметра' },
-  { id: 'u4', param: 'Параметр_099', type: 'delete', description: 'Удаление устаревшего параметра' },
+  { id: 'u1', param: 'V_приборная_км_ч', type: 'calibration', description: 'Обновление градуировки (коэфф: 1.02 → 1.05)' },
+  { id: 'u2', param: 'Темп_1_двиг_C', type: 'range', description: 'Изменение диапазона: мин -100 → -120, макс 100 → 110' },
+  { id: 'u3', param: 'Напряжение_АКБ_В', type: 'add', description: 'Добавление нового параметра' },
+  { id: 'u4', param: 'Давление_масла_1_кгс_см2', type: 'delete', description: 'Удаление устаревшего параметра' },
 ];
 
 export default function DbUpdateModal({ open, onClose }: DbUpdateModalProps) {

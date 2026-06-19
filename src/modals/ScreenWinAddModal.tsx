@@ -1,33 +1,33 @@
 import { useState } from 'react';
 import { Modal, Button, Typography, Space, message } from 'antd';
 import { BarChartOutlined, TableOutlined, CameraOutlined, EnvironmentOutlined, PlusOutlined } from '@ant-design/icons';
+import { useScreenStore } from '../stores/useScreenStore';
+import type { ScreenWindow } from '../mock-data/types';
 
 const { Text } = Typography;
 
 interface ScreenWinAddModalProps {
   open: boolean;
   onClose: () => void;
+  screenId?: string;
 }
 
-interface WinType {
-  type: string;
-  label: string;
-  icon: React.ReactNode;
-  desc: string;
-}
-
-const winTypes: WinType[] = [
+const winTypes: { type: ScreenWindow['type']; label: string; icon: React.ReactNode; desc: string }[] = [
   { type: 'graph', label: 'График', icon: <BarChartOutlined style={{ fontSize: 32 }} />, desc: 'Временной ряд выбранных параметров' },
   { type: 'table', label: 'Таблица', icon: <TableOutlined style={{ fontSize: 32 }} />, desc: 'Таблица значений параметров' },
   { type: 'video', label: 'Видео', icon: <CameraOutlined style={{ fontSize: 32 }} />, desc: 'Видеопоток с камеры' },
   { type: 'map', label: 'Карта', icon: <EnvironmentOutlined style={{ fontSize: 32 }} />, desc: 'Схема расположения объектов' },
 ];
 
-export default function ScreenWinAddModal({ open, onClose }: ScreenWinAddModalProps) {
-  const [selected, setSelected] = useState<string | null>(null);
+export default function ScreenWinAddModal({ open, onClose, screenId }: ScreenWinAddModalProps) {
+  const [selected, setSelected] = useState<ScreenWindow['type'] | null>(null);
+  const { addWindow } = useScreenStore();
+
+  const targetId = screenId || useScreenStore.getState().selectedId || useScreenStore.getState().screens[0]?.id;
 
   const handleAdd = () => {
-    if (!selected) return;
+    if (!selected || !targetId) return;
+    addWindow(targetId, selected);
     message.success(`Рабочее окно типа «${winTypes.find((w) => w.type === selected)?.label}» добавлено`);
     setSelected(null);
     onClose();

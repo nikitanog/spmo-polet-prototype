@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Modal, InputNumber, Input, Button, Alert, Typography, Space } from 'antd';
 import { SaveOutlined } from '@ant-design/icons';
 
@@ -7,13 +7,23 @@ const { Text } = Typography;
 interface TrajSavePartModalProps {
   open: boolean;
   onClose: () => void;
+  timeFrom?: number;
+  timeTo?: number;
 }
 
-export default function TrajSavePartModal({ open, onClose }: TrajSavePartModalProps) {
-  const [timeFrom, setTimeFrom] = useState<number>(0);
-  const [timeTo, setTimeTo] = useState<number>(2999);
+export default function TrajSavePartModal({ open, onClose, timeFrom: initialFrom, timeTo: initialTo }: TrajSavePartModalProps) {
+  const [timeFrom, setTimeFrom] = useState<number>(initialFrom ?? 0);
+  const [timeTo, setTimeTo] = useState<number>(initialTo ?? 2999);
   const [fileName, setFileName] = useState('traj_part');
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (open) {
+      setTimeFrom(initialFrom ?? 0);
+      setTimeTo(initialTo ?? 2999);
+      setSaved(false);
+    }
+  }, [open, initialFrom, initialTo]);
 
   const handleSave = () => {
     if (timeTo <= timeFrom) return;

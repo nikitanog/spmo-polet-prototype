@@ -3,10 +3,10 @@ import { useSearchParams } from 'react-router-dom';
 import { Row, Col, Tree, Input, Select, Table, Tag, Button, Typography, Space, Badge, message } from 'antd';
 import { SearchOutlined, PlusOutlined, ImportOutlined, ExportOutlined, EditOutlined } from '@ant-design/icons';
 import { mockParams } from '../../mock-data';
-import { mockTopics } from '../../mock-data';
 import ParamPropertiesModal from '../../modals/ParamPropertiesModal';
 import ImportDbModal from '../../modals/ImportDbModal';
 import type { ColumnsType } from 'antd/es/table';
+import type { DataNode } from 'antd/es/tree';
 
 const { Text } = Typography;
 
@@ -30,18 +30,34 @@ export default function DatabasePage() {
   const [searchText, setSearchText] = useState('');
   const [typeFilter, setTypeFilter] = useState<string | undefined>();
   const [subdivisionFilter, setSubdivisionFilter] = useState<string | undefined>();
+  const [categoryFilter, setCategoryFilter] = useState<string | undefined>(
+    dbType === 'current' ? 'Истинные значения' : dbType === 'calc' ? 'Расчётные значения' : undefined
+  );
   const [selectedParam, setSelectedParam] = useState<ParamRow | null>(null);
   const [propsOpen, setPropsOpen] = useState(false);
   const [importOpen, setImportOpen] = useState(false);
 
-  const treeData = mockTopics.map((t) => ({
-    title: t.name,
-    key: t.id,
-    children: t.objects.map((o) => ({
-      title: o.name,
-      key: o.id,
+  const subdivisions = useMemo(
+    () => [...new Set(mockParams.map(p => p.subdivision))].sort(),
+    []
+  );
+
+  const treeData: DataNode[] = useMemo(() => [{
+    title: <Text strong>Все параметры</Text>,
+    key: 'all',
+    children: subdivisions.map(sub => ({
+      title: sub,
+      key: `sub-${sub}`,
+      isLeaf: false,
+      children: [...new Set(
+        mockParams.filter(p => p.subdivision === sub).map(p => p.category)
+      )].map(cat => ({
+        title: cat,
+        key: `cat-${sub}-${cat}`,
+        isLeaf: true,
+      })),
     })),
-  }));
+  }], []);
 
   const allParams: ParamRow[] = useMemo(
     () => mockParams.map((p) => ({ key: p.id, ...p })),
@@ -54,7 +70,12 @@ export default function DatabasePage() {
   );
 
   const subdivisionOptions = useMemo(
-    () => [...new Set(allParams.map((p) => p.subdivision))].map((s) => ({ value: s, text: s })),
+    () => subdivisions.map((s) => ({ value: s, text: s })),
+    [],
+  );
+
+  const categoryOptions = useMemo(
+    () => [...new Set(allParams.map((p) => p.category))].map((c) => ({ value: c, text: c })),
     [],
   );
 
@@ -63,9 +84,10 @@ export default function DatabasePage() {
       if (searchText && !p.name.toLowerCase().includes(searchText.toLowerCase()) && !p.description.toLowerCase().includes(searchText.toLowerCase())) return false;
       if (typeFilter && p.type !== typeFilter) return false;
       if (subdivisionFilter && p.subdivision !== subdivisionFilter) return false;
+      if (categoryFilter && p.category !== categoryFilter) return false;
       return true;
     });
-  }, [searchText, typeFilter, subdivisionFilter]);
+  }, [searchText, typeFilter, subdivisionFilter, categoryFilter]);
 
   const columns: ColumnsType<ParamRow> = [
     { title: 'Параметр', dataIndex: 'name', key: 'name', width: 160, fixed: 'left', sorter: (a, b) => a.name.localeCompare(b.name) },
@@ -83,12 +105,33 @@ export default function DatabasePage() {
     setPropsOpen(true);
   };
 
+  const handleTreeSelect = (keys: React.Key[]) => {
+    if (keys.length === 0) return;
+    const key = keys[0] as string;
+    if (key === 'all') {
+      setSubdivisionFilter(undefined);
+      setCategoryFilter(undefined);
+      setSearchText('');
+    } else if (key.startsWith('cat-')) {
+      const [, sub, ...catParts] = key.split('-');
+      const cat = catParts.join('-');
+      setSubdivisionFilter(sub);
+      setCategoryFilter(cat);
+      setSearchText('');
+    } else if (key.startsWith('sub-')) {
+      const sub = key.slice(4);
+      setSubdivisionFilter(sub);
+      setCategoryFilter(undefined);
+      setSearchText('');
+    }
+  };
+
   return (
     <div>
       <Row gutter={[12, 12]}>
         <Col span={24}>
           <Text strong style={{ fontSize: 16 }}>{dbTitle}</Text>
-          <Text type="secondary" style={{ marginLeft: 12 }}>{mockTopics.length} темы, {allParams.length} параметров</Text>
+          <Text type="secondary" style={{ marginLeft: 12 }}>{subdivisions.length} подразделений, {allParams.length} параметров</Text>
         </Col>
       </Row>
 
@@ -98,22 +141,11 @@ export default function DatabasePage() {
             treeData={treeData}
             defaultExpandAll
             style={{ background: 'transparent' }}
-            onSelect={(keys) => {
-              if (keys.length === 0) return;
-              const key = keys[0] as string;
-              const topic = mockTopics.find(t => t.id === key);
-              if (topic) {
-                const idx = mockTopics.indexOf(topic);
-                setSubdivisionFilter(`Подразделение ${idx + 1}`);
-                setSearchText('');
-              } else {
-                const obj = mockTopics.flatMap(t => t.objects).find(o => o.id === key);
-                if (obj) {
-                  setSearchText(obj.name);
-                  setSubdivisionFilter(undefined);
-                }
-              }
-            }}
+            selectedKeys={[
+              categoryFilter && subdivisionFilter ? `cat-${subdivisionFilter}-${categoryFilter}` :
+              subdivisionFilter ? `sub-${subdivisionFilter}` : 'all'
+            ]}
+            onSelect={handleTreeSelect}
           />
         </Col>
         <Col span={19}>
@@ -139,6 +171,14 @@ export default function DatabasePage() {
               value={subdivisionFilter}
               onChange={setSubdivisionFilter}
               options={subdivisionOptions}
+              allowClear
+              style={{ width: 180 }}
+            />
+            <Select
+              placeholder="Категория"
+              value={categoryFilter}
+              onChange={setCategoryFilter}
+              options={categoryOptions}
               allowClear
               style={{ width: 180 }}
             />

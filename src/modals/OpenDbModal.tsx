@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Modal, Select, Button, Alert, Typography, Space } from 'antd';
 
 const { Text } = Typography;
@@ -16,12 +17,19 @@ const mockDbFiles = [
 ];
 
 export default function OpenDbModal({ open, onClose }: OpenDbModalProps) {
+  const navigate = useNavigate();
   const [selected, setSelected] = useState<string | null>(null);
   const [opened, setOpened] = useState(false);
 
   const handleOpen = () => {
     if (!selected) return;
     setOpened(true);
+    setTimeout(() => {
+      setSelected(null);
+      setOpened(false);
+      onClose();
+      navigate('/db');
+    }, 800);
   };
 
   const handleClose = () => {
@@ -39,6 +47,7 @@ export default function OpenDbModal({ open, onClose }: OpenDbModalProps) {
       onCancel={handleClose}
       footer={null}
       width={500}
+      destroyOnClose
     >
       {!opened ? (
         <div style={{ display: 'flex', flexDirection: 'column', gap: 16, marginTop: 8 }}>
@@ -77,8 +86,7 @@ export default function OpenDbModal({ open, onClose }: OpenDbModalProps) {
           type="success"
           showIcon
           message="База данных открыта"
-          description={`Файл ${selectedFile?.label} загружен. Таблица параметров доступна в разделе БД СБИ.`}
-          action={<Button size="small" onClick={handleClose}>Закрыть</Button>}
+          description={`Файл ${selectedFile?.label} загружен. Переход в раздел БД СБИ...`}
         />
       )}
     </Modal>
