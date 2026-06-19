@@ -76,6 +76,7 @@ const OPS_ITEMS = [
 export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate();
   const mode = useAppStore((s) => s.mode);
+  const setMode = useAppStore((s) => s.setMode);
   const activeTrajectoryId = useAppStore((s) => s.activeTrajectoryId);
 
   const [selectObjectOpen, setSelectObjectOpen] = useState(false);
@@ -477,20 +478,34 @@ export default function MainLayout({ children }: MainLayoutProps) {
       }}>
         <div style={{ color: '#fff', fontWeight: 700, fontSize: 13, letterSpacing: 0.5 }}>
           СПМО «ПОЛЁТ» v5
-          <span style={{
-            marginLeft: 10, fontSize: 10, background: isFlight ? '#52c41a' : '#1677ff',
-            padding: '1px 6px', borderRadius: 3, color: '#fff', fontWeight: 600, verticalAlign: 'middle',
-          }}>
-            {isFlight ? 'ПОЛЁТ' : 'АНАЛИЗ'}
-          </span>
         </div>
         <Space size={2}>
           <Tooltip title="Ctrl+O — Открыть"><Button type="text" icon={<FolderOpenOutlined style={{ fontSize: 13 }} />} style={{ color: '#fff', height: 22, width: 22 }} onClick={() => setTrajOpenOpen(true)} /></Tooltip>
           <Tooltip title="Ctrl+S — Сохранить"><Button type="text" icon={<SaveOutlined style={{ fontSize: 13 }} />} style={{ color: '#fff', height: 22, width: 22 }} onClick={() => message.success('Сохранено')} /></Tooltip>
           <Tooltip title="F5 — Расчёт"><Button type="text" icon={<CalculatorOutlined style={{ fontSize: 13 }} />} style={{ color: '#fff', height: 22, width: 22 }} onClick={() => setTrajCalcOpen(true)} /></Tooltip>
-          <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: 4, fontSize: 12 }}>
-            {isFlight ? 'Пилот' : 'Аналитик'}
-          </span>
+          <div style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.3)', margin: '0 6px' }} />
+          <button
+            style={{
+              background: 'transparent', border: '1px solid rgba(255,255,255,0.4)', color: '#fff',
+              borderRadius: 3, padding: '1px 8px', cursor: 'pointer', fontSize: 11, height: 20,
+              display: 'flex', alignItems: 'center', gap: 4,
+            }}
+            onClick={() => {
+              Modal.confirm({
+                title: `Переключиться в режим «${isFlight ? 'Анализ' : 'Полёт'}»?`,
+                content: 'Будут применены соответствующие настройки интерфейса.',
+                okText: 'Да',
+                cancelText: 'Отмена',
+                onOk: () => setMode(isFlight ? 'analysis' : 'flight'),
+              });
+            }}
+          >
+            <span style={{
+              width: 8, height: 8, borderRadius: '50%', display: 'inline-block',
+              background: isFlight ? '#52c41a' : '#1677ff',
+            }} />
+            {isFlight ? 'ПОЛЁТ' : 'АНАЛИЗ'}
+          </button>
         </Space>
       </Header>
 
