@@ -9,7 +9,7 @@ export default function StatusBar() {
   const selectedTopic = themes.find(t => t.id === selectedTopicId);
 
   return (
-    <div style={{ display: 'flex', gap: 16, padding: '4px 16px', background: '#f0f2f5', fontSize: 12, borderTop: '1px solid #d9d9d9' }}>
+    <div style={{ display: 'flex', gap: 16, padding: '2px 12px', background: '#F1EDED', fontSize: 11, borderTop: '1px solid #C0C0C0', height: 22, alignItems: 'center', color: '#000' }}>
       <span>Режим: <Tag color={mode === 'flight' ? 'green' : 'blue'}>{mode === 'flight' ? 'ПОЛЁТ' : 'АНАЛИЗ'}</Tag></span>
       {selectedObj && (
         <span>

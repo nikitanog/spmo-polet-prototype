@@ -3,6 +3,9 @@ import { Layout, Modal, message, Space, Button, Dropdown, Tooltip, Input, Select
 import { useNavigate } from 'react-router-dom';
 import {
   FolderOpenOutlined, SaveOutlined, CalculatorOutlined, DeleteOutlined,
+  FolderOutlined, DatabaseOutlined, NodeIndexOutlined, MonitorOutlined,
+  EyeOutlined, LineChartOutlined, TableOutlined, ToolOutlined,
+  SettingOutlined, QuestionCircleOutlined, CameraOutlined,
 } from '@ant-design/icons';
 import MainMenuBar from '../components/main-menu/MainMenuBar';
 import ObjectTree from '../components/sidebar/ObjectTree';
@@ -47,7 +50,6 @@ import DbExportModal from '../modals/DbExportModal';
 import DbCheckModal from '../modals/DbCheckModal';
 import ScreenWinAddModal from '../modals/ScreenWinAddModal';
 import AddValueModal from '../modals/AddValueModal';
-import { CameraOutlined } from '@ant-design/icons';
 import { useAppStore } from '../stores/useAppStore';
 import { useViewStore } from '../stores/useViewStore';
 import { useScreenStore } from '../stores/useScreenStore';
@@ -58,9 +60,22 @@ interface MainLayoutProps {
   children: React.ReactNode;
 }
 
+const OPS_ITEMS = [
+  { key: 'object-select', icon: <FolderOutlined />, label: 'Объект' },
+  { key: 'db-view', icon: <DatabaseOutlined />, label: 'БД СБИ' },
+  { key: 'traj-open', icon: <NodeIndexOutlined />, label: 'Траектория' },
+  { key: 'screen-create', icon: <MonitorOutlined />, label: 'Экран' },
+  { key: 'view-scales', icon: <EyeOutlined />, label: 'Вид' },
+  { key: 'graph-add-func', icon: <LineChartOutlined />, label: 'График' },
+  { key: 'table-values', icon: <TableOutlined />, label: 'Таблицы' },
+  { key: 'proc-task-list', icon: <ToolOutlined />, label: 'Обработка' },
+  { key: 'service-settings', icon: <SettingOutlined />, label: 'Сервис' },
+  { key: 'help-f1', icon: <QuestionCircleOutlined />, label: 'Справка' },
+];
+
 export default function MainLayout({ children }: MainLayoutProps) {
   const navigate = useNavigate();
-  const { mode, setMode } = useAppStore();
+  const mode = useAppStore((s) => s.mode);
   const activeTrajectoryId = useAppStore((s) => s.activeTrajectoryId);
 
   const [selectObjectOpen, setSelectObjectOpen] = useState(false);
@@ -136,9 +151,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
           content: (
             <div>
               <p>Вы действительно хотите выйти из программы?</p>
-              <p style={{ fontSize: 11, color: '#888' }}>
-                Все несохранённые данные будут потеряны.
-              </p>
+              <p style={{ fontSize: 11, color: '#888' }}>Все несохранённые данные будут потеряны.</p>
             </div>
           ),
           okText: 'Завершить',
@@ -151,9 +164,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
               content: (
                 <div style={{ textAlign: 'center', padding: '16px 0' }}>
                   <p>Сеанс работы СПМО «Полёт» завершён.</p>
-                  <p style={{ fontSize: 11, color: '#888' }}>
-                    Для выхода из приложения закройте вкладку браузера.
-                  </p>
+                  <p style={{ fontSize: 11, color: '#888' }}>Для выхода из приложения закройте вкладку браузера.</p>
                 </div>
               ),
               okText: 'Закрыть вкладку',
@@ -173,8 +184,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
         message.success('Траектория закрыта');
         break;
       case 'traj-save-as':
-        setTrajSavePartOpen(true);
-        break;
       case 'traj-save-part':
         setTrajSavePartOpen(true);
         break;
@@ -194,10 +203,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
         message.info('Кликните по маркеру на графике для удаления. Esc — отмена.');
         break;
       case 'marker-del-all':
-        Modal.confirm({ title: 'Удалить все маркеры?', onOk: () => {
-          useAppStore.getState().clearMarkers();
-          message.success('Все маркеры удалены');
-        }});
+        Modal.confirm({ title: 'Удалить все маркеры?', onOk: () => { useAppStore.getState().clearMarkers(); message.success('Все маркеры удалены'); }});
         break;
       case 'sample-save':
       case 'sample-add':
@@ -216,8 +222,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
         navigate('/db?db=calc');
         break;
       case 'db-change':
-        setOpenDbOpen(true);
-        break;
       case 'db-open':
         setOpenDbOpen(true);
         break;
@@ -241,12 +245,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           const store = useScreenStore.getState();
           const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
           if (sel && sel.windows.length > 0) {
-            const last = sel.windows[sel.windows.length - 1];
-            store.removeWindow(sel.id, last.id);
+            store.removeWindow(sel.id, sel.windows[sel.windows.length - 1].id);
             message.success('Окно удалено');
-          } else {
-            message.info('Нет окон для удаления');
-          }
+          } else message.info('Нет окон для удаления');
         }});
         break;
       case 'screen-win-clear':
@@ -254,12 +255,9 @@ export default function MainLayout({ children }: MainLayoutProps) {
           const store = useScreenStore.getState();
           const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
           if (sel && sel.windows.length > 0) {
-            const last = sel.windows[sel.windows.length - 1];
-            store.updateWindowParams(sel.id, last.id, []);
+            store.updateWindowParams(sel.id, sel.windows[sel.windows.length - 1].id, []);
             message.success('Параметры окна очищены');
-          } else {
-            message.info('Нет окон для очистки');
-          }
+          } else message.info('Нет окон для очистки');
         }});
         break;
       case 'screen-win-rename': {
@@ -271,12 +269,8 @@ export default function MainLayout({ children }: MainLayoutProps) {
           onOk: () => {
             const store = useScreenStore.getState();
             const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
-            if (sel && newName.trim()) {
-              store.renameScreen(sel.id, newName.trim());
-              message.success(`Экран переименован в «${newName.trim()}»`);
-            } else {
-              message.info('Имя не изменено');
-            }
+            if (sel && newName.trim()) { store.renameScreen(sel.id, newName.trim()); message.success(`Экран переименован в «${newName.trim()}»`); }
+            else message.info('Имя не изменено');
           },
         });
         break;
@@ -284,24 +278,18 @@ export default function MainLayout({ children }: MainLayoutProps) {
       case 'screen-win-move': {
         let dir = '';
         Modal.confirm({
-          title: 'Переместить/Копировать рабочее окно',
+          title: 'Переместить рабочее окно',
           icon: null,
-          content: <Select placeholder="Выберите направление" style={{ width: '100%' }} onChange={(v) => { dir = v; }} options={[{ value: 'left', label: 'Левее' }, { value: 'right', label: 'Правее' }, { value: 'up', label: 'Выше' }, { value: 'down', label: 'Ниже' }]} />,
+          content: <Select placeholder="Направление" style={{ width: '100%' }} onChange={(v) => { dir = v; }} options={[{ value: 'left', label: 'Левее' }, { value: 'right', label: 'Правее' }]} />,
           onOk: () => {
             const store = useScreenStore.getState();
             const sel = store.selectedId ? store.screens.find(s => s.id === store.selectedId) : store.screens[0];
             if (sel && sel.windows.length > 0) {
               const lastIdx = sel.windows.length - 1;
-              const toIdx = dir === 'left' || dir === 'up' ? Math.max(0, lastIdx - 1) : lastIdx;
-              if (toIdx !== lastIdx) {
-                store.reorderWindows(sel.id, lastIdx, toIdx);
-                message.success(`Окно перемещено ${dir === 'left' || dir === 'up' ? 'влево/вверх' : 'вправо/вниз'}`);
-              } else {
-                message.info('Окно уже на краю');
-              }
-            } else {
-              message.info('Нет окон для перемещения');
-            }
+              const toIdx = dir === 'left' ? Math.max(0, lastIdx - 1) : lastIdx;
+              if (toIdx !== lastIdx) { store.reorderWindows(sel.id, lastIdx, toIdx); message.success('Окно перемещено'); }
+              else message.info('Окно уже на краю');
+            } else message.info('Нет окон');
           },
         });
         break;
@@ -311,15 +299,15 @@ export default function MainLayout({ children }: MainLayoutProps) {
         break;
       case 'view-scales':
         useViewStore.getState().setScalesVisible(!useViewStore.getState().scalesVisible);
-        message.success(useViewStore.getState().scalesVisible ? 'Шкалы параметров: показаны' : 'Шкалы параметров: скрыты');
+        message.success(useViewStore.getState().scalesVisible ? 'Шкалы: показаны' : 'Шкалы: скрыты');
         break;
       case 'view-values-list':
         useViewStore.getState().setValuesMode('list');
-        message.success('Текущие значения: режим списка');
+        message.success('Текущие значения: список');
         break;
       case 'view-values-table':
         useViewStore.getState().setValuesMode('table');
-        message.success('Текущие значения: режим таблицы');
+        message.success('Текущие значения: таблица');
         break;
       case 'view-values-off':
         useViewStore.getState().setValuesMode('hidden');
@@ -331,15 +319,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
         break;
       case 'cursor-cross-val':
         useViewStore.getState().setCursorMode('crossVal');
-        message.success('Курсор: перекрестье со значениями');
         break;
       case 'cursor-arrow':
         useViewStore.getState().setCursorMode('arrow');
-        message.success('Курсор: стрелка');
         break;
       case 'cursor-vline':
         useViewStore.getState().setCursorMode('vline');
-        message.success('Курсор: вертикальная линия');
         break;
       case 'graph-add-func':
         setAddFuncOpen(true);
@@ -373,8 +358,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setTableExportOpen(true);
         break;
       case 'table-print-preview':
-        setPrintPreviewOpen(true);
-        break;
       case 'table-print':
         setPrintPreviewOpen(true);
         break;
@@ -440,13 +423,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
         setSettingsOpen(true);
         break;
       case 'screenshot':
-        message.success('Снимок экрана сохранён: screenshot_2026-06-18.png');
+        message.success('Снимок экрана: screenshot.png');
         break;
       case 'help-f1':
         navigate('/help');
         break;
       case 'help-about':
-        Modal.info({ title: 'О программе', content: 'СПМО «Полёт» версия 5. Прототип UI. Разработка: НИЦ «Полёт». Версия прототипа: v5-r1. Дата сборки: 2026-06-19.' });
+        Modal.info({ title: 'О программе', content: 'СПМО «Полёт» версия 5. Прототип UI. Разработка: НИЦ «Полёт».' });
         break;
       default:
         message.info(`Команда: ${key}`);
@@ -455,24 +438,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
   useEffect(() => {
     const handler = (e: KeyboardEvent) => {
-      if (e.ctrlKey && e.key === 'o') {
-        e.preventDefault();
-        setTrajOpenOpen(true);
-      } else if (e.ctrlKey && e.key === 's') {
-        e.preventDefault();
-        message.success('Сохранено (Ctrl+S)');
-      } else if (e.key === 'F1') {
-        e.preventDefault();
-        navigate('/help');
-      } else if (e.key === 'F5') {
-        e.preventDefault();
-        setTrajCalcOpen(true);
-      } else if (e.key === 'Delete') {
-        Modal.confirm({ title: 'Удалить выделенный объект?', onOk: () => message.success('Объект удалён') });
-      } else if (e.altKey && e.key === 'F4') {
-        e.preventDefault();
-        Modal.confirm({ title: 'Завершить работу?', onOk: () => window.close() });
-      }
+      if (e.ctrlKey && e.key === 'o') { e.preventDefault(); setTrajOpenOpen(true); }
+      else if (e.ctrlKey && e.key === 's') { e.preventDefault(); message.success('Сохранено (Ctrl+S)'); }
+      else if (e.key === 'F1') { e.preventDefault(); navigate('/help'); }
+      else if (e.key === 'F5') { e.preventDefault(); setTrajCalcOpen(true); }
+      else if (e.key === 'Delete') { Modal.confirm({ title: 'Удалить?', onOk: () => message.success('Удалено') }); }
+      else if (e.altKey && e.key === 'F4') { e.preventDefault(); Modal.confirm({ title: 'Завершить работу?', onOk: () => window.close() }); }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
@@ -485,15 +456,6 @@ export default function MainLayout({ children }: MainLayoutProps) {
   document.documentElement.style.setProperty('--bg', bgColor);
   document.documentElement.style.setProperty('--text', textColor);
 
-  const toolbarStyle: React.CSSProperties = {
-    background: isFlight ? '#0d1b3e' : '#fff',
-    borderBottom: `1px solid ${isFlight ? '#1a3a6a' : '#d9d9d9'}`,
-    padding: '4px 12px',
-    display: 'flex',
-    gap: 4,
-    alignItems: 'center',
-  };
-
   const ctxMenuItems = [
     { key: 'marker-set', label: 'Установить маркер' },
     { key: 'graph-add-func', label: 'Добавить функцию' },
@@ -505,81 +467,94 @@ export default function MainLayout({ children }: MainLayoutProps) {
   return (
     <Layout style={{ minHeight: '100vh', background: bgColor, color: textColor }}>
       <Header style={{
-        background: isFlight ? '#0f3460' : '#1a1a2e',
-        padding: '0 16px',
+        background: 'linear-gradient(90deg, #2A4DAB 0%, #80BEEB 100%)',
+        padding: '0 12px',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 48,
+        height: 28,
+        borderBottom: '1px solid #1a3a8a',
       }}>
-        <div style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>
+        <div style={{ color: '#fff', fontWeight: 700, fontSize: 13, letterSpacing: 0.5 }}>
           СПМО «ПОЛЁТ» v5
           <span style={{
-            marginLeft: 12,
-            fontSize: 11,
-            background: isFlight ? '#52c41a' : '#1677ff',
-            padding: '2px 8px',
-            borderRadius: 4,
-            color: '#fff',
-            fontWeight: 600,
+            marginLeft: 10, fontSize: 10, background: isFlight ? '#52c41a' : '#1677ff',
+            padding: '1px 6px', borderRadius: 3, color: '#fff', fontWeight: 600, verticalAlign: 'middle',
           }}>
             {isFlight ? 'ПОЛЁТ' : 'АНАЛИЗ'}
           </span>
         </div>
-        <Space>
-          <Tooltip title="Ctrl+O">
-            <Button type="text" icon={<FolderOpenOutlined />} style={{ color: '#fff' }} onClick={() => setTrajOpenOpen(true)} />
-          </Tooltip>
-          <Tooltip title="Ctrl+S">
-            <Button type="text" icon={<SaveOutlined />} style={{ color: '#fff' }} onClick={() => message.success('Сохранено')} />
-          </Tooltip>
-          <Tooltip title="F5 — расчёт">
-            <Button type="text" icon={<CalculatorOutlined />} style={{ color: '#fff' }} onClick={() => setTrajCalcOpen(true)} />
-          </Tooltip>
-          <button
-            style={{ background: 'transparent', border: '1px solid rgba(255,255,255,0.5)', color: '#fff', borderRadius: 4, padding: '4px 12px', cursor: 'pointer', marginLeft: 8 }}
-            onClick={() => {
-              Modal.confirm({
-                title: `Переключиться в режим «${isFlight ? 'Анализ' : 'Полёт'}»?`,
-                onOk: () => setMode(isFlight ? 'analysis' : 'flight'),
-              });
-            }}
-          >
-            Переключить режим
-          </button>
+        <Space size={2}>
+          <Tooltip title="Ctrl+O — Открыть"><Button type="text" icon={<FolderOpenOutlined style={{ fontSize: 13 }} />} style={{ color: '#fff', height: 22, width: 22 }} onClick={() => setTrajOpenOpen(true)} /></Tooltip>
+          <Tooltip title="Ctrl+S — Сохранить"><Button type="text" icon={<SaveOutlined style={{ fontSize: 13 }} />} style={{ color: '#fff', height: 22, width: 22 }} onClick={() => message.success('Сохранено')} /></Tooltip>
+          <Tooltip title="F5 — Расчёт"><Button type="text" icon={<CalculatorOutlined style={{ fontSize: 13 }} />} style={{ color: '#fff', height: 22, width: 22 }} onClick={() => setTrajCalcOpen(true)} /></Tooltip>
+          <span style={{ color: 'rgba(255,255,255,0.6)', marginLeft: 4, fontSize: 12 }}>
+            {isFlight ? 'Пилот' : 'Аналитик'}
+          </span>
         </Space>
       </Header>
+
       <Layout>
+        <div style={{
+          width: 44, background: '#DEDDE1', display: 'flex', flexDirection: 'column',
+          borderRight: '1px solid #C0C0C0', padding: '4px 0', gap: 1, flexShrink: 0,
+        }}>
+          {OPS_ITEMS.map((item) => (
+            <Tooltip key={item.key} title={item.label} placement="right">
+              <Button
+                type="text"
+                icon={item.icon}
+                style={{
+                  width: 36, height: 36, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  borderRadius: 4, fontSize: 18, color: '#333',
+                }}
+                onClick={() => handleMenuClick(item.key)}
+              />
+            </Tooltip>
+          ))}
+        </div>
+
         <Sider
           width={220}
-          style={{ background: isFlight ? '#16213e' : '#fafafa', borderRight: '1px solid #d9d9d9' }}
+          style={{ background: '#DEDDE1', borderRight: '1px solid #C0C0C0' }}
         >
           <ObjectTree onCreateTopic={() => setCreateTopicOpen(true)} onCreateObject={() => setCreateObjectOpen(true)} />
         </Sider>
-        <Content style={{ padding: 0, background: bgColor, overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
+
+        <Content style={{ padding: 0, background: '#FFFFFF', overflow: 'auto', display: 'flex', flexDirection: 'column', minWidth: 0 }}>
           <MainMenuBar onMenuClick={handleMenuClick} hasTrajectory={!!activeTrajectoryId} />
-          <div style={toolbarStyle}>
-            <Tooltip title="Открыть (Ctrl+O)"><Button size="small" icon={<FolderOpenOutlined />} onClick={() => setTrajOpenOpen(true)} /></Tooltip>
-            <Tooltip title="Сохранить (Ctrl+S)"><Button size="small" icon={<SaveOutlined />} onClick={() => message.success('Сохранено')} /></Tooltip>
-            <Tooltip title="Рассчитать (F5)"><Button size="small" icon={<CalculatorOutlined />} onClick={() => setTrajCalcOpen(true)} /></Tooltip>
-            <Tooltip title="Удалить (Del)"><Button size="small" icon={<DeleteOutlined />} onClick={() => Modal.confirm({ title: 'Удалить?', onOk: () => message.success('Удалено') })} /></Tooltip>
+
+          <div style={{
+            background: '#E8E8E8', borderBottom: '1px solid #C0C0C0',
+            borderTop: '1px solid #F4F3F5', padding: '2px 8px',
+            display: 'flex', gap: 1, alignItems: 'center', height: 30,
+          }}>
+            <Tooltip title="Открыть траекторию"><Button size="small" type="text" icon={<FolderOpenOutlined style={{ fontSize: 14 }} />} onClick={() => setTrajOpenOpen(true)} /></Tooltip>
+            <div style={{ width: 1, height: 18, background: '#C0C0C0', margin: '0 4px' }} />
+            <Tooltip title="Рассчитать (F5)"><Button size="small" type="text" icon={<CalculatorOutlined style={{ fontSize: 14 }} />} onClick={() => setTrajCalcOpen(true)} /></Tooltip>
+            <Tooltip title="Сохранить часть"><Button size="small" type="text" icon={<SaveOutlined style={{ fontSize: 14 }} />} onClick={() => setTrajSavePartOpen(true)} /></Tooltip>
+            <div style={{ width: 1, height: 18, background: '#C0C0C0', margin: '0 4px' }} />
+            <Tooltip title="Добавить функцию"><Button size="small" type="text" icon={<LineChartOutlined style={{ fontSize: 14 }} />} onClick={() => setAddFuncOpen(true)} /></Tooltip>
+            <Tooltip title="Автопостроение"><Button size="small" type="text" icon={<TableOutlined style={{ fontSize: 14 }} />} onClick={() => setGraphAutoOpen(true)} /></Tooltip>
+            <div style={{ width: 1, height: 18, background: '#C0C0C0', margin: '0 4px' }} />
+            <Tooltip title="Маркеры"><Button size="small" type="text" icon={<NodeIndexOutlined style={{ fontSize: 14 }} />} onClick={() => { useAppStore.getState().setMarkerSetMode('set'); message.info('Кликните на графике'); }} /></Tooltip>
+            <Tooltip title="Сбои"><Button size="small" type="text" icon={<DeleteOutlined style={{ fontSize: 14 }} />} onClick={() => setFaultsOpen(true)} /></Tooltip>
             <div style={{ flex: 1 }} />
-            <Tooltip title="Снимок экрана"><Button size="small" icon={<CameraOutlined />} onClick={() => message.success('Снимок экрана: screenshot_2026-06-18.png')} /></Tooltip>
+            <Tooltip title="Снимок экрана"><Button size="small" type="text" icon={<CameraOutlined style={{ fontSize: 14 }} />} onClick={() => message.success('Снимок экрана сохранён')} /></Tooltip>
+            <Tooltip title="Настройки"><Button size="small" type="text" icon={<SettingOutlined style={{ fontSize: 14 }} />} onClick={() => setSettingsOpen(true)} /></Tooltip>
           </div>
+
           <div
-            style={{ flex: 1, padding: 16 }}
-            onContextMenu={(e) => {
-              e.preventDefault();
-            }}
+            style={{ flex: 1, padding: 12, background: '#FFFFFF' }}
+            onContextMenu={(e) => { e.preventDefault(); }}
           >
             <Dropdown menu={{ items: ctxMenuItems, onClick: ({ key }) => handleMenuClick(key) }} trigger={['contextMenu']}>
-              <div style={{ minHeight: '100%' }}>
-                {children}
-              </div>
+              <div style={{ minHeight: '100%' }}>{children}</div>
             </Dropdown>
           </div>
         </Content>
       </Layout>
+
       <StatusBar />
 
       <SelectObjectModal open={selectObjectOpen} onClose={() => setSelectObjectOpen(false)} />
