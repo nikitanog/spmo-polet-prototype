@@ -1,4 +1,4 @@
-import { Row, Col, Button, Typography } from 'antd';
+import { Row, Col, Button, Typography, Tabs } from 'antd';
 import { useNavigate } from 'react-router-dom';
 import { AimOutlined, RocketOutlined } from '@ant-design/icons';
 import { useAppStore } from '../../stores/useAppStore';
@@ -10,7 +10,7 @@ const { Text, Title } = Typography;
 
 export default function WorkspacePage() {
   const navigate = useNavigate();
-  const { activeTrajectoryId, themes, selectedTopicId, selectedObjectId, exited, resetExit } = useAppStore();
+  const { activeTrajectoryId, themes, selectedTopicId, selectedObjectId, exited, resetExit, trajectories, setActiveTrajectory } = useAppStore();
   const selectedObj = themes.flatMap(t => t.objects).find(o => o.id === selectedObjectId);
   const selectedTopic = themes.find(t => t.id === selectedTopicId);
 
@@ -27,7 +27,7 @@ export default function WorkspacePage() {
     );
   }
 
-  if (!activeTrajectoryId) {
+  if (trajectories.length === 0) {
     return (
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '60vh', flexDirection: 'column', gap: 16, textAlign: 'center' }}>
         <RocketOutlined style={{ fontSize: 48, color: '#1677ff', opacity: 0.6 }} />
@@ -48,6 +48,37 @@ export default function WorkspacePage() {
 
   return (
     <div>
+      {trajectories.length > 1 && (
+        <Tabs
+          activeKey={activeTrajectoryId || undefined}
+          onChange={(key) => setActiveTrajectory(key)}
+          type="card"
+          size="small"
+          style={{ marginBottom: 8 }}
+          items={trajectories.map((t) => ({
+            key: t.id,
+            label: t.name,
+            closable: trajectories.length > 1,
+            onClose: () => {
+              if (activeTrajectoryId === t.id) {
+                const others = trajectories.filter((tr) => tr.id !== t.id);
+                if (others.length > 0) setActiveTrajectory(others[0].id);
+              }
+              useAppStore.getState().addTrajectory({ id: '__remove__', name: '', params: [], data: {} });
+            },
+          }))}
+          onEdit={(targetKey, action) => {
+            if (action === 'remove') {
+              const idx = trajectories.findIndex((t) => t.id === targetKey);
+              if (activeTrajectoryId === targetKey) {
+                const remaining = trajectories.filter((t) => t.id !== targetKey);
+                if (remaining.length > 0) setActiveTrajectory(remaining[Math.min(idx, remaining.length - 1)].id);
+              }
+              useAppStore.setState((s) => ({ trajectories: s.trajectories.filter((t) => t.id !== targetKey) }));
+            }
+          }}
+        />
+      )}
       <Row gutter={[12, 12]}>
         <Col span={24}>
           <TrajectoryChart />

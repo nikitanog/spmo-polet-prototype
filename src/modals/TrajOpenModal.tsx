@@ -17,7 +17,7 @@ const mockFiles = [
 ];
 
 export default function TrajOpenModal({ open, onClose }: TrajOpenModalProps) {
-  const { setActiveTrajectory, trajectories } = useAppStore();
+  const { addTrajectory, setActiveTrajectory, trajectories } = useAppStore();
   const [selected, setSelected] = useState<string | null>(null);
   const [opened, setOpened] = useState(false);
 
@@ -27,7 +27,13 @@ export default function TrajOpenModal({ open, onClose }: TrajOpenModalProps) {
     if (knownTraj) {
       setActiveTrajectory(selected);
     } else {
-      setActiveTrajectory(trajectories[0].id);
+      const params = ['V_ист', 'V_приб', 'V_верт', 'V_путевая', 'H_бар', 'H_отн_ЗП', 'M_число', 'УТ', 'α_атак', 'γ_крен', 'υ_тангаж', 'Ψ_курс', 'Vy_верт', 'n_x', 'n_y', 'n_z', 'РН', 'РВ', 'РЭ', 'a_прод', 'a_норм', 'a_бок', 'ω_x', 'ω_y', 'ω_z', 'G_топл', 'P_каб', 'T_каб', 'T_H_двиг', 'P_масл', 'T_масл', 't_пол', 't_ост', 'Fuel_расх', 'Fuel_ост', 'T_вх_двиг', 'P_вх_двиг', 'B_параш', 'Р_шв_носк', 'T_шв_носк', 'Полож_мех', 'У_закр_лев', 'У_закр_пр', 'Скор_верт', 'Угол_сн', 'Расх_топл_сум', 'T_выт_возд', 'Сигн_пож', 'V_приб_испр', 'H_бар_испр'];
+      const count = 50;
+      const data: Record<string, number[]> = {};
+      params.forEach((p) => {
+        data[p] = Array.from({ length: count }, () => Math.random() * 200 - 50);
+      });
+      addTrajectory({ id: selected, name: mockFiles.find((f) => f.value === selected)?.label || selected, params, data });
     }
     setOpened(true);
   };

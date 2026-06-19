@@ -473,10 +473,13 @@ export default function MainLayout({ children }: MainLayoutProps) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'space-between',
-        height: 28,
+        height: 32,
         borderBottom: '1px solid #1a3a8a',
       }}>
-        <div style={{ color: '#fff', fontWeight: 700, fontSize: 13, letterSpacing: 0.5 }}>
+        <div
+          style={{ color: '#fff', fontWeight: 700, fontSize: 13, letterSpacing: 0.5, cursor: 'pointer' }}
+          onClick={() => navigate('/')}
+        >
           СПМО «ПОЛЁТ» v5
         </div>
         <Space size={2}>
